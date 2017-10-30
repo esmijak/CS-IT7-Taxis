@@ -8,10 +8,11 @@ sqlCtx = SQLContext(spark.sparkContext, spark)
 
 Creating a DataFrame:
 
-import schemas
+from schemas import *
 
-table = 'table_you_want_to_read'
-schema = schemas.<theSchemaYouNeed>
-df = sqlCtx.read.csv('hdfs://172.25.24.242:54310/user/csit7/%s/part-m-00000' % table, schema)
+df = loadDataFrame(sqlCtx, Table.COMBINED_DATA_SAMPLE)
 
-For example: table = 'cluster_data_sample', schema = schemas.clusterDataSchema
+Shorthand for registering a table for SQL:
+
+registerTable(sqlCtx, Table.COMBINED_DATA_SAMPLE)
+spark.sql('SELECT AVG(pickup_cid) FROM combined_data_sample') # Or whatever
