@@ -9,6 +9,8 @@ timeSlotSchema = StructType([StructField("from", TimestampType(), False), Struct
 
 rawDataSchema = StructType([StructField("tpep_pickup_datetime", TimestampType(), True), StructField("tpep_dropoff_datetime", TimestampType(), True), StructField("pickup_longitude", DoubleType(), True), StructField("pickup_latitude", DoubleType(), True), StructField("dropoff_longitude", DoubleType(), True), StructField("dropoff_latitude", DoubleType(), True), StructField("id", IntegerType(), False)])
 
+demandSchema = StructType([StructField("pickup_timeslot_id", IntegerType(), False), StructField("pickup_cid", IntegerType(), False), StructField("demand", IntegerType(), True)])
+
 class Table(Enum):
   COMBINED_DATA = auto()
   CLUSTER_DATA = auto()
@@ -18,6 +20,7 @@ class Table(Enum):
   COMBINED_DATA_SAMPLE = auto()
   CLUSTER_DATA_SAMPLE = auto()
   RAW_DATA_SAMPLE = auto()
+  DEMAND_SAMPLE = auto()
 
 def tableName(tab):
   if tab is Table.COMBINED_DATA:
@@ -34,6 +37,8 @@ def tableName(tab):
     return "cluster_data_sample"
   elif tab is Table.RAW_DATA_SAMPLE:
     return "trips_sample"
+  elif tab is Table.DEMAND_SAMPLE:
+    return "demand_sample"
   else:
     return None
 
@@ -46,6 +51,8 @@ def schemaForTable(tab):
     return timeSlotSchema
   elif tab is Table.RAW_DATA or tab is Table.RAW_DATA_SAMPLE:
     return rawDataSchema
+  elif tab is Table.DEMAND_SAMPLE:
+    return demandSchema
   else:
     return None
 
