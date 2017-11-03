@@ -42,16 +42,16 @@ rmse = evaluator.evaluate(predictions)
 
 print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
 
-""" constant guess : """
-test_data.registerTempTable("test_data")
-size = test_data.count()
+# """ constant guess : """
+# test_data.registerTempTable("test_data")
+# size = test_data.count()
 
-def constant_guess(constant):
-    error = 0
-    error = spark.sql("SELECT SUM(POWER({} - demand, 2)) AS error FROM test_data".format(constant)).collect()[0][0]
-    error /= size
-    error = np.sqrt(error)
-    print("RMSE for guessing {}: {}\n".format(constant, error))
+# def constant_guess(constant):
+    # error = 0
+    # error = spark.sql("SELECT SUM(POWER({} - demand, 2)) AS error FROM test_data".format(constant)).collect()[0][0]
+    # error /= size
+    # error = np.sqrt(error)
+    # print("RMSE for guessing {}: {}\n".format(constant, error))
 
-constant_guess(0)
-constant_guess(1)
+# constant_guess(0)
+# constant_guess(1)
