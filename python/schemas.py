@@ -1,4 +1,5 @@
 from pyspark.sql.types import *
+from pyspark.sql.utils import AnalysisException
 from enum import Enum, auto
 
 combinedDataSchema = StructType([
@@ -95,7 +96,10 @@ def paramsForTable(tab):
 
 def loadDataFrame(sqlCtx, tab):
   (table, schema) = paramsForTable(tab)
-  return sqlCtx.read.csv('hdfs://172.25.24.242:54310/user/csit7/%s/part-m-00000' % table, schema)
+  try:
+    return sqlCtx.read.csv('hdfs://172.25.24.242:54310/user/csit7/%s/part-m-00000' % table, schema)
+  except AnalysisException:
+    return sqlCtx.read.parquet('hdfs://csit7-master:54310/user/csit7/%s' % table)
 
 def registerTable(sqlCtx, tab):
   loadDataFrame(sqlCtx, tab).registerTempTable(tableName(tab))
