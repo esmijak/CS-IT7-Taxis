@@ -1,7 +1,7 @@
 from pyspark.sql import *
 from pyspark.ml.linalg import Vectors
 from pyspark.ml.feature import VectorAssembler
-from  pyspark.ml.regression import  DecisionTreeRegressor
+from  pyspark.ml.regression import  RandomForestRegressor
 from schemas import *
 import pandas as pd
 from pyspark.ml.evaluation import RegressionEvaluator
@@ -32,26 +32,14 @@ train_data, test_data = final_data.randomSplit([0.7, 0.3])
 
 """  Model and predictions : """
 
-decisionTree = DecisionTreeRegressor(labelCol='demand')
-dt_model = decisionTree.fit(train_data)
-predictions = dt_model.transform(test_data)
+randomForest = RandomForestRegressor(labelCol='demand')
+rf_model = randomForest.fit(train_data)
+print("number of trees :", rf_model.getNumTrees())
+
+predictions = rf_model.transform(test_data)
 """ Evaluation : """
 
 evaluator = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="rmse")
 rmse = evaluator.evaluate(predictions)
 
 print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
-
-# """ constant guess : """
-# test_data.registerTempTable("test_data")
-# size = test_data.count()
-
-# def constant_guess(constant):
-    # error = 0
-    # error = spark.sql("SELECT SUM(POWER({} - demand, 2)) AS error FROM test_data".format(constant)).collect()[0][0]
-    # error /= size
-    # error = np.sqrt(error)
-    # print("RMSE for guessing {}: {}\n".format(constant, error))
-
-# constant_guess(0)
-# constant_guess(1)
