@@ -38,18 +38,26 @@ rideClusterSchema = StructType([
   StructField("pickup_cid", IntegerType(), False),
   StructField("dropoff_cid", IntegerType(), False)])
 
+tripTimeSchema = StructType([
+  StructField("trip_id", IntegerType(), False),
+  StructField("pickup_timeslot_id", IntegerType(), False),
+  StructField("dropoff_timeslot_id", IntegerType(), False)
+])
+
 class Table(Enum):
   COMBINED_DATA = auto()
   CLUSTER_DATA = auto()
   TIME_SLOTS = auto()
   RAW_DATA = auto()
   RIDE_CLUSTERS = auto()
+  TRIP_TIMES = auto()
 
   COMBINED_DATA_SAMPLE = auto()
   CLUSTER_DATA_SAMPLE = auto()
   RAW_DATA_SAMPLE = auto()
   DEMAND_SAMPLE = auto()
   RIDE_CLUSTERS_SAMPLE = auto()
+  TRIP_TIMES_SAMPLE = auto()
 
 def tableName(tab):
   if tab is Table.COMBINED_DATA:
@@ -62,6 +70,8 @@ def tableName(tab):
     return "trips"
   elif tab is Table.RIDE_CLUSTERS:
     return "ride_clusters"
+  elif tab is Table.TRIP_TIMES:
+    return "trip_times"
   elif tab is Table.COMBINED_DATA_SAMPLE:
     return "combined_data_sample"
   elif tab is Table.CLUSTER_DATA_SAMPLE:
@@ -72,6 +82,8 @@ def tableName(tab):
     return "demand_sample"
   elif tab is Table.RIDE_CLUSTERS_SAMPLE:
     return "ride_clusters_sample"
+  elif tab is Table.TRIP_TIMES_SAMPLE:
+      return "trip_times_sample"
   else:
     return None
 
@@ -82,6 +94,8 @@ def schemaForTable(tab):
     return clusterDataSchema
   elif tab is Table.TIME_SLOTS:
     return timeSlotSchema
+  elif tab is Table.TRIP_TIMES or tab is Table.TRIP_TIMES_SAMPLE:
+    return tripTimeSchema
   elif tab is Table.RAW_DATA or tab is Table.RAW_DATA_SAMPLE:
     return rawDataSchema
   elif tab is Table.DEMAND_SAMPLE:
@@ -97,7 +111,7 @@ def paramsForTable(tab):
 def loadDataFrame(sqlCtx, tab):
   (table, schema) = paramsForTable(tab)
   try:
-    return sqlCtx.read.csv('hdfs://172.25.24.242:54310/user/csit7/%s/part-m-00000' % table, schema)
+    return sqlCtx.read.csv('hdfs://csit7-master:54310/user/csit7/%s/part-m-00000' % table, schema)
   except AnalysisException:
     return sqlCtx.read.parquet('hdfs://csit7-master:54310/user/csit7/%s' % table)
 
