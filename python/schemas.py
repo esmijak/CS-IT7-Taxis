@@ -49,6 +49,7 @@ class Table(Enum):
   CLUSTER_DATA = auto()
   TIME_SLOTS = auto()
   RAW_DATA = auto()
+  DEMAND = auto()
   RIDE_CLUSTERS = auto()
   TRIP_TIMES = auto()
 
@@ -68,6 +69,8 @@ def tableName(tab):
     return "time_slots"
   elif tab is Table.RAW_DATA:
     return "trips"
+  elif tab is Table.DEMAND:
+    return "demand"
   elif tab is Table.RIDE_CLUSTERS:
     return "ride_clusters"
   elif tab is Table.TRIP_TIMES:
@@ -98,7 +101,7 @@ def schemaForTable(tab):
     return tripTimeSchema
   elif tab is Table.RAW_DATA or tab is Table.RAW_DATA_SAMPLE:
     return rawDataSchema
-  elif tab is Table.DEMAND_SAMPLE:
+  elif tab is Table.DEMAND or tab is Table.DEMAND_SAMPLE:
     return demandSchema
   elif tab is Table.RIDE_CLUSTERS or tab is Table.RIDE_CLUSTERS_SAMPLE:
     return rideClusterSchema
