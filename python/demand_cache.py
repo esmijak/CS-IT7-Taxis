@@ -5,7 +5,7 @@ from timeit import timeit
 
 CACHED_TIMESLOT_COUNT = 8              # The total number of pages to be fetched, including the 'current page'
 
-DEMAND_CACHE_DEBUG = True              # Controls debug prints
+DEMAND_CACHE_DEBUG = False             # Controls debug prints
 
 DEMAND_CACHE_ASYNC = True              # If true, future pages will be fetched asynchronously
 
