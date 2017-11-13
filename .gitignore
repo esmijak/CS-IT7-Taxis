@@ -2,3 +2,5 @@
 
 .DS_Store
 ./python/visualization/geo_export_84b991a0-49f4-4c35-a58a-f770d4bb88fc.dbf
+.idea
+__pycache__
