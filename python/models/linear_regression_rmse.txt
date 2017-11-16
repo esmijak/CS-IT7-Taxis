@@ -1,0 +1,12 @@
+Predictions are based on 100.0 days of data.
+
+RMSE on test data for cluster 0 on a week basis is 15.52126584048027
+RMSE on test data for cluster 1 on a week basis is 22.695822444095406
+RMSE on test data for cluster 2 on a week basis is 0.03148369049553853
+RMSE on test data for cluster 3 on a week basis is 5.425296245150576
+RMSE on test data for cluster 4 on a week basis is 11.653119605445918
+RMSE on test data for cluster 5 on a week basis is 0.031488372614373046
+RMSE on test data for cluster 6 on a week basis is 0.5538877682600389
+RMSE on test data for cluster 7 on a week basis is 3.448482230558771
+RMSE on test data for cluster 8 on a week basis is 2.091410328177273
+RMSE on test data for cluster 9 on a week basis is 0.03150633349089365
