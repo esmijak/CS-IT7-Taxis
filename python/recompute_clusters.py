@@ -17,13 +17,9 @@ CLUSTERING_SIZE = 50000
 
 # This constant is the average amount of pickups per cluster.
 # That is, there will be CLUSTERING_SIZE / K_MEANS_FACTOR clusters.
-K_MEANS_FACTOR = 100
+K_MEANS_FACTOR = 250
 
-# The rough number of rows in the table. It doesn't have to be exact.
-# Underestimates should be better than overestimates (unconfirmed)
-SIZE_ESTIMATE = 77000000
-
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
 # First we fetch the data we will use for clustering
@@ -41,7 +37,7 @@ print("Done, now starting K-means with K={}".format(int(CLUSTERING_SIZE / K_MEAN
 
 #km = KMeans(int(CLUSTERING_SIZE / K_MEANS_FACTOR))
 clusters = KMeans.train(df.select("pickup_longitude", "pickup_latitude")
-                          .rdd.sample(False, (CLUSTERING_SIZE*100) / SIZE_ESTIMATE)
+                          .rdd.sample(False, (CLUSTERING_SIZE*100.0) / 77000000.0)
                           .map(lambda row: Vectors.dense(row["pickup_longitude"], row["pickup_latitude"])),
                         int(CLUSTERING_SIZE / K_MEANS_FACTOR), 1000)
 
@@ -50,8 +46,8 @@ print("K-means is done, clearing any existing data...")
 
 # Clean the database before proceeding
 
-subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/ride_clusters"])
-subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/cluster_data"])
+subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/clusters/ride_clusters250"])
+subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/clusters/cluster_data250"])
 
 print("Done, initiating refill")
 
@@ -67,13 +63,13 @@ results = df.rdd.map(lambda r: Row(r['id'], predict(r['pickup_longitude'], r['pi
                                             predict(r['dropoff_longitude'], r['dropoff_latitude'])))
 
 sqlCtx.createDataFrame(results, schemaForTable(Table.RIDE_CLUSTERS))\
-    .write.save("/user/csit7/ride_clusters", format="parquet", mode="overwrite")
+    .write.save(hadoopify("clusters/ride_clusters250"), format="parquet", mode="overwrite")
 
 clusterRows = []
 for i in range(0, len(clusters.clusterCenters)):
     center = clusters.clusterCenters[i]
     clusterRows.append(Row(i, center[0].item(), center[1].item()))
-spark.createDataFrame(clusterRows, schemaForTable(Table.CLUSTER_DATA)).write.save("/user/csit7/cluster_data",
+spark.createDataFrame(clusterRows, schemaForTable(Table.CLUSTER_DATA)).write.save(hadoopify("clusters/cluster_data250"),
                                               format="parquet", mode="overwrite")
 
 print("All done, cleaning up and exiting")

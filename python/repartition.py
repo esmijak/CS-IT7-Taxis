@@ -4,7 +4,7 @@ from pyspark.sql import *
 from schemas import *
 import datetime
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
 print("Fetching data...")
@@ -43,5 +43,5 @@ res = tripsDF.rdd.map(map_trip)
 print("Aggregation done, writing results")
 
 resDF = sqlCtx.createDataFrame(res, tripTimeSchema)
-resDF.write.mode("overwrite").parquet("/user/csit7/trip_times")
+resDF.write.mode("overwrite").parquet(hadoopify("trip_times"))
 print("Done")

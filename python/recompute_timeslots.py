@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from pyspark.sql import *
-from schemas import timeSlotSchema
+from schemas import timeSlotSchema, hadoopify
 import datetime
 
 start_slot = datetime.datetime(2015, 1, 1, 0)
@@ -13,7 +13,7 @@ while (start_slot < datetime.datetime(2015, 6, 30, 0)):
     id += 1
     start_slot = next
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 df = spark.createDataFrame(slot_list, timeSlotSchema)
 
-df.write.mode("overwrite").parquet("/user/csit7/time_slots");
+df.write.mode("overwrite").parquet(hadoopify("time_slots"));

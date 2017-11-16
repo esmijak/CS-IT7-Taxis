@@ -26,7 +26,7 @@ K_MEANS_FACTOR = 100
 # Underestimates should be better than overestimates (unconfirmed)
 SIZE_ESTIMATE = 1000000
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
 # First we fetch the data we will use for clustering
@@ -71,13 +71,13 @@ results = df.rdd.map(lambda r: Row(r['id'], predict(r['pickup_longitude'], r['pi
                                             predict(r['dropoff_longitude'], r['dropoff_latitude'])))
 
 sqlCtx.createDataFrame(results, schemaForTable(Table.RIDE_CLUSTERS_SAMPLE))\
-    .write.save("/user/csit7/ride_clusters_sample", format="parquet", mode="overwrite")
+    .write.save(hadoopify("ride_clusters_sample"), format="parquet", mode="overwrite")
 
 clusterRows = []
 for i in range(0, len(clusters.clusterCenters)):
     center = clusters.clusterCenters[i]
     clusterRows.append(Row(i, center[0].item(), center[1].item()))
-spark.createDataFrame(clusterRows, schemaForTable(Table.CLUSTER_DATA_SAMPLE)).write.save("/user/csit7/cluster_data_sample",
+spark.createDataFrame(clusterRows, schemaForTable(Table.CLUSTER_DATA_SAMPLE)).write.save(hadoopify("cluster_data_sample"),
                                               format="parquet", mode="overwrite")
 
 print("All done, cleaning up and exiting")

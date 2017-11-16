@@ -5,7 +5,7 @@ import subprocess
 TO_FIX = "trips"
 ####
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
 def remove_existing(name):

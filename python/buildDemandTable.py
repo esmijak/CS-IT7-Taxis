@@ -3,12 +3,14 @@
 
 from pyspark.sql import *
 from schemas import *
+from pyspark.storagelevel import StorageLevel
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
 print("Fetching raw values")
-registerTable(sqlCtx, Table.COMBINED_DATA)
+#registerTable(sqlCtx, Table.COMBINED_DATA)
+spark.read.parquet(hadoopify('clusters/combined_data500')).createOrReplaceTempView('combined_data')
 
 cids = spark.sql('SELECT DISTINCT pickup_cid FROM combined_data')
 tids = spark.sql('SELECT DISTINCT pickup_timeslot_id FROM combined_data')
@@ -34,5 +36,5 @@ res = pairs.rdd.map(lambda r: (r['pickup_timeslot_id'], r['pickup_cid'],
 
 print("Inserting")
 resDF = spark.createDataFrame(res, demandSchema)
-resDF.write.mode('overwrite').parquet('/users/csit7/demand')
+resDF.write.mode('overwrite').parquet(hadoopify('clusters/demand500'))
 print("Done")
