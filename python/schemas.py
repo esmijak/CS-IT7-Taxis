@@ -19,6 +19,19 @@ timeSlotSchema = StructType([
   StructField("to", TimestampType(), False),
   StructField("id", IntegerType(), False)])
 
+extendedTimeSlotSchema = StructType([
+  StructField("id", IntegerType(), False),
+  StructField("from", TimestampType(), False),
+  StructField("to", TimestampType(), False),
+  StructField("month", IntegerType(), False),
+  StructField("week", IntegerType(), False),
+  StructField("day", IntegerType(), False),
+  StructField("day_of_week", IntegerType(), x`False),
+  StructField("time_of_day_code", IntegerType(), False),
+  StructField("hour", IntegerType(), False),
+  StructField("minute", IntegerType(), False)
+])
+
 rawDataSchema = StructType([
   StructField("tpep_pickup_datetime", TimestampType(), True),
   StructField("tpep_dropoff_datetime", TimestampType(), True),
@@ -44,14 +57,49 @@ tripTimeSchema = StructType([
   StructField("dropoff_timeslot_id", IntegerType(), False)
 ])
 
+gridDataSchema = StructType([
+  StructField("east", DoubleType(), False),
+  StructField("west", DoubleType(), False),
+  StructField("south", DoubleType(), False),
+  StructField("north", DoubleType(), False),
+  StructField("horizontal_slots", IntegerType(), False),
+  StructField("vertical_slots", IntegerType(), False),
+  StructField("missing_value", IntegerType(), True),
+])
+
+gridTripSchema = StructType([
+  StructField("trip_id", IntegerType(), False),
+  StructField("pickup_long_slot", IntegerType(), True),
+  StructField("pickup_lat_slot", IntegerType(), True),
+  StructField("dropoff_long_slot", IntegerType(), True),
+  StructField("dropoff_lat_slot", IntegerType(), True),
+])
+
+finalDataSchema = StructType([
+  StructField("month", IntegerType(), False),
+  StructField("week", IntegerType(), False),
+  StructField("day", IntegerType(), False),
+  StructField("day_of_week", IntegerType(), False),
+  StructField("time_of_day_code", IntegerType(), False),
+  StructField("hour", IntegerType(), False),
+  StructField("minute", IntegerType(), False),
+  StructField("origin", IntegerType(), False),
+  StructField("is_manhattan", IntegerType(), False),
+  StructField("is_airport", IntegerType(), False),
+  StructField("amount", IntegerType(), False),
+  StructField("pickup_timeslot_id", IntegerType(), False)
+])
+
 class Table(Enum):
   COMBINED_DATA = auto()
   CLUSTER_DATA = auto()
   TIME_SLOTS = auto()
+  EX_TIME_SLOTS = auto()
   RAW_DATA = auto()
   DEMAND = auto()
   RIDE_CLUSTERS = auto()
   TRIP_TIMES = auto()
+  FINAL_DATA = auto()
 
   COMBINED_DATA_SAMPLE = auto()
   CLUSTER_DATA_SAMPLE = auto()
@@ -75,6 +123,10 @@ def tableName(tab):
     return "ride_clusters"
   elif tab is Table.TRIP_TIMES:
     return "trip_times"
+  elif tab is Table.EX_TIME_SLOTS:
+    return "extended_timeslots"
+  elif tab is Table.FINAL_DATA:
+    return "final_data"
   elif tab is Table.COMBINED_DATA_SAMPLE:
     return "combined_data_sample"
   elif tab is Table.CLUSTER_DATA_SAMPLE:
@@ -97,6 +149,10 @@ def schemaForTable(tab):
     return clusterDataSchema
   elif tab is Table.TIME_SLOTS:
     return timeSlotSchema
+  elif tab is Table.EX_TIME_SLOTS:
+    return extendedTimeSlotSchema
+  elif tab is Table.FINAL_DATA:
+    return finalDataSchema
   elif tab is Table.TRIP_TIMES or tab is Table.TRIP_TIMES_SAMPLE:
     return tripTimeSchema
   elif tab is Table.RAW_DATA or tab is Table.RAW_DATA_SAMPLE:
@@ -108,15 +164,33 @@ def schemaForTable(tab):
   else:
     return None
 
+def hadoopify(path):
+  return 'hdfs://csit7-master:54310/user/csit7/' + path
+
 def paramsForTable(tab):
   return (tableName(tab), schemaForTable(tab))
 
 def loadDataFrame(sqlCtx, tab):
   (table, schema) = paramsForTable(tab)
   try:
-    return sqlCtx.read.csv('hdfs://csit7-master:54310/user/csit7/%s/part-m-00000' % table, schema)
+    return sqlCtx.read.csv(hadoopify(table + '/part-m-00000'), schema)
   except AnalysisException:
-    return sqlCtx.read.parquet('hdfs://csit7-master:54310/user/csit7/%s' % table)
+    return sqlCtx.read.parquet(hadoopify(table))
 
 def registerTable(sqlCtx, tab):
   loadDataFrame(sqlCtx, tab).registerTempTable(tableName(tab))
+
+def getGridData(sqlCtx, suffix):
+  data = sqlCtx.read.parquet(hadoopify('grids/griddata' + suffix)).head()
+  return {
+    'east': data['east'],
+    'west': data['west'],
+    'south': data['south'],
+    'north': data['north'],
+    'horizontal_slots': data['horizontal_slots'],
+    'vertical_slots': data['vertical_slots'],
+    'missing_value': data['missing_value']
+  }
+
+def loadVariation(sqlCtx, folder, tab, variation):
+  return loadDataFrame(sqlCtx, hadoopify(folder + '/' + tableName(tab) + variation))
