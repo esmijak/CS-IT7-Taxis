@@ -23,8 +23,13 @@ extendedTimeSlotSchema = StructType([
   StructField("id", IntegerType(), False),
   StructField("from", TimestampType(), False),
   StructField("to", TimestampType(), False),
-  StructField("day_of_week", IntegerType(), False),
-  StructField("time_of_day", IntegerType(), False)
+  StructField("month", IntegerType(), False),
+  StructField("week", IntegerType(), False),
+  StructField("day", IntegerType(), False),
+  StructField("day_of_week", IntegerType(), x`False),
+  StructField("time_of_day_code", IntegerType(), False),
+  StructField("hour", IntegerType(), False),
+  StructField("minute", IntegerType(), False)
 ])
 
 rawDataSchema = StructType([
@@ -70,6 +75,21 @@ gridTripSchema = StructType([
   StructField("dropoff_lat_slot", IntegerType(), True),
 ])
 
+finalDataSchema = StructType([
+  StructField("month", IntegerType(), False),
+  StructField("week", IntegerType(), False),
+  StructField("day", IntegerType(), False),
+  StructField("day_of_week", IntegerType(), False),
+  StructField("time_of_day_code", IntegerType(), False),
+  StructField("hour", IntegerType(), False),
+  StructField("minute", IntegerType(), False),
+  StructField("origin", IntegerType(), False),
+  StructField("is_manhattan", IntegerType(), False),
+  StructField("is_airport", IntegerType(), False),
+  StructField("amount", IntegerType(), False),
+  StructField("pickup_timeslot_id", IntegerType(), False)
+])
+
 class Table(Enum):
   COMBINED_DATA = auto()
   CLUSTER_DATA = auto()
@@ -79,6 +99,7 @@ class Table(Enum):
   DEMAND = auto()
   RIDE_CLUSTERS = auto()
   TRIP_TIMES = auto()
+  FINAL_DATA = auto()
 
   COMBINED_DATA_SAMPLE = auto()
   CLUSTER_DATA_SAMPLE = auto()
@@ -104,6 +125,8 @@ def tableName(tab):
     return "trip_times"
   elif tab is Table.EX_TIME_SLOTS:
     return "extended_timeslots"
+  elif tab is Table.FINAL_DATA:
+    return "final_data"
   elif tab is Table.COMBINED_DATA_SAMPLE:
     return "combined_data_sample"
   elif tab is Table.CLUSTER_DATA_SAMPLE:
@@ -128,6 +151,8 @@ def schemaForTable(tab):
     return timeSlotSchema
   elif tab is Table.EX_TIME_SLOTS:
     return extendedTimeSlotSchema
+  elif tab is Table.FINAL_DATA:
+    return finalDataSchema
   elif tab is Table.TRIP_TIMES or tab is Table.TRIP_TIMES_SAMPLE:
     return tripTimeSchema
   elif tab is Table.RAW_DATA or tab is Table.RAW_DATA_SAMPLE:
