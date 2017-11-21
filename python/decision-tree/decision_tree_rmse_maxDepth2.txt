@@ -1,0 +1,22 @@
+Training set contains 7 days i.e. 1008 time slots 
+Test set contains 1 days i.e. 144 time slots 
+RMSE for cluster 0 is 14.152777380259408
+RMSE for cluster 1 is 30.222882139429007
+RMSE for cluster 2 is 0.0
+RMSE for cluster 3 is 4.437437632145292
+RMSE for cluster 4 is 9.578887835172624
+RMSE for cluster 5 is 0.0
+RMSE for cluster 6 is 0.5289876881558411
+RMSE for cluster 7 is 3.8900429372374643
+RMSE for cluster 8 is 1.7979819228982605
+RMSE for cluster 9 is 0.0
+RMSE for cluster 10 is 4.694906354330887
+RMSE for cluster 11 is 6.125317765349056
+RMSE for cluster 12 is 0.47611999313030595
+RMSE for cluster 13 is 4.46032540601442
+RMSE for cluster 14 is 0.0
+RMSE for cluster 15 is 3.459847609162111
+RMSE for cluster 16 is 0.16529020981945
+RMSE for cluster 17 is 0.0
+RMSE for cluster 18 is 2.1777625423246607
+RMSE for cluster 19 is 0.0
