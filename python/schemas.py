@@ -26,7 +26,7 @@ extendedTimeSlotSchema = StructType([
   StructField("month", IntegerType(), False),
   StructField("week", IntegerType(), False),
   StructField("day", IntegerType(), False),
-  StructField("day_of_week", IntegerType(), x`False),
+  StructField("day_of_week", IntegerType(), False),
   StructField("time_of_day_code", IntegerType(), False),
   StructField("hour", IntegerType(), False),
   StructField("minute", IntegerType(), False)

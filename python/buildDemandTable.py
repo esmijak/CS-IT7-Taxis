@@ -19,7 +19,8 @@ print("Creating grouping")
 
 grouping = spark.sql("SELECT pickup_timeslot_id, pickup_cid, COUNT(*) AS cnt "
             + "FROM combined_data "
-            + "GROUP BY 1, 2")
+            + "GROUP BY 1, 2"
+            + "ORDER BY 1 ASC")
 
 grouping = {(tid, cid): cnt for (tid, cid, cnt) in grouping.collect()}
 
