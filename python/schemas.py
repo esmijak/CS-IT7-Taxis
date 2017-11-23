@@ -100,6 +100,7 @@ class Table(Enum):
   RIDE_CLUSTERS = auto()
   TRIP_TIMES = auto()
   FINAL_DATA = auto()
+  FINAL_DATA_500 = auto()
 
   COMBINED_DATA_SAMPLE = auto()
   CLUSTER_DATA_SAMPLE = auto()
@@ -127,6 +128,8 @@ def tableName(tab):
     return "extended_timeslots"
   elif tab is Table.FINAL_DATA:
     return "final_data"
+  elif tab is Table.FINAL_DATA_500:
+    return "clusters/final_data500"
   elif tab is Table.COMBINED_DATA_SAMPLE:
     return "combined_data_sample"
   elif tab is Table.CLUSTER_DATA_SAMPLE:
@@ -151,7 +154,7 @@ def schemaForTable(tab):
     return timeSlotSchema
   elif tab is Table.EX_TIME_SLOTS:
     return extendedTimeSlotSchema
-  elif tab is Table.FINAL_DATA:
+  elif tab is Table.FINAL_DATA or tab is Table.FINAL_DATA_500:
     return finalDataSchema
   elif tab is Table.TRIP_TIMES or tab is Table.TRIP_TIMES_SAMPLE:
     return tripTimeSchema
@@ -191,6 +194,3 @@ def getGridData(sqlCtx, suffix):
     'vertical_slots': data['vertical_slots'],
     'missing_value': data['missing_value']
   }
-
-def loadVariation(sqlCtx, folder, tab, variation):
-  return loadDataFrame(sqlCtx, hadoopify(folder + '/' + tableName(tab) + variation))
