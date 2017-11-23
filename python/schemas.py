@@ -193,4 +193,6 @@ def getGridData(sqlCtx, suffix):
     'horizontal_slots': data['horizontal_slots'],
     'vertical_slots': data['vertical_slots'],
     'missing_value': data['missing_value']
+
   }
+
