@@ -1,0 +1,990 @@
+current cluster number is:  0
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean| 28.17039183222958|
+| stddev|16.327926724113382|
+|    min|                 0|
+|    max|               106|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|26.459051724137932|
+| stddev|13.849464399551694|
+|    min|                 0|
+|    max|                83|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 9.10348
+R Squared Error (R2) on test data = 0.567832
+current cluster number is:  1
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean| 52.83715047829286|
+| stddev|25.014863217112584|
+|    min|                 0|
+|    max|               172|
++-------+------------------+
+
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|             4176|
+|   mean|41.29501915708812|
+| stddev|17.63741624592356|
+|    min|                1|
+|    max|               99|
++-------+-----------------+
+
+Root Mean Squared Error (RMSE) on test data = 13.9128
+R Squared Error (R2) on test data = 0.377611
+current cluster number is:  2
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|1.839587932303164E-4|
+| stddev|0.013562205257066797|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|4.789272030651341E-4|
+| stddev| 0.02188178443277887|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0218871
+R Squared Error (R2) on test data = -0.000727518
+current cluster number is:  3
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|7.405261221486387|
+| stddev|4.974916792215335|
+|    min|                0|
+|    max|               29|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 6.726772030651341|
+| stddev|4.5079635958280475|
+|    min|                 0|
+|    max|                25|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 3.51275
+R Squared Error (R2) on test data = 0.392651
+current cluster number is:  4
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|18.740066225165563|
+| stddev|11.527991154696558|
+|    min|                 0|
+|    max|               109|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 18.26221264367816|
+| stddev|10.499522397523098|
+|    min|                 0|
+|    max|                62|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 6.47357
+R Squared Error (R2) on test data = 0.619764
+current cluster number is:  5
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|4.139072847682119E-4|
+| stddev|0.020340968364243997|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|4.789272030651341E-4|
+| stddev|0.021881784432778873|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.023952
+R Squared Error (R2) on test data = -0.198451
+current cluster number is:  6
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|              21744|
+|   mean|0.26752207505518766|
+| stddev| 0.5390011086833161|
+|    min|                  0|
+|    max|                  5|
++-------+-------------------+
+
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|               4176|
+|   mean|0.28376436781609193|
+| stddev| 0.5495211250346839|
+|    min|                  0|
+|    max|                  4|
++-------+-------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.537818
+R Squared Error (R2) on test data = 0.0419101
+current cluster number is:  7
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean| 4.299254966887418|
+| stddev|3.3042791883179996|
+|    min|                 0|
+|    max|                26|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 4.054597701149425|
+| stddev|3.0325006666457126|
+|    min|                 0|
+|    max|                18|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.40115
+R Squared Error (R2) on test data = 0.372894
+current cluster number is:  8
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|1.7253495217071375|
+| stddev|2.2288037129951124|
+|    min|                 0|
+|    max|                20|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|1.8503352490421456|
+| stddev| 2.247418187684626|
+|    min|                 0|
+|    max|                15|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.10037
+R Squared Error (R2) on test data = 0.126371
+current cluster number is:  9
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|0.001931567328918...|
+| stddev| 0.04595532934374429|
+|    min|                   0|
+|    max|                   2|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.001676245210727...|
+| stddev|0.040912543743634754|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0409654
+R Squared Error (R2) on test data = -0.00282577
+current cluster number is:  10
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|7.3357247976453275|
+| stddev| 5.414473683697464|
+|    min|                 0|
+|    max|                39|
++-------+------------------+
+
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|             4176|
+|   mean|7.451388888888889|
+| stddev|5.305790124851221|
+|    min|                0|
+|    max|               41|
++-------+-----------------+
+
+Root Mean Squared Error (RMSE) on test data = 3.78278
+R Squared Error (R2) on test data = 0.491576
+current cluster number is:  11
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|4.698813465783664|
+| stddev|6.739345651397851|
+|    min|                0|
+|    max|               40|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|1.9492337164750957|
+| stddev|  2.47658435579157|
+|    min|                 0|
+|    max|                26|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.33551
+R Squared Error (R2) on test data = 0.11047
+current cluster number is:  12
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|              21744|
+|   mean|0.21651949963208242|
+| stddev| 0.4845317489730405|
+|    min|                  0|
+|    max|                  5|
++-------+-------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|0.2765804597701149|
+| stddev|0.5319829741468798|
+|    min|                 0|
+|    max|                 4|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.521952
+R Squared Error (R2) on test data = 0.0371265
+current cluster number is:  13
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|7.469692788815306|
+| stddev|5.263851937391019|
+|    min|                0|
+|    max|               37|
++-------+-----------------+
+
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|             4176|
+|   mean|7.136015325670498|
+| stddev|4.704151391078335|
+|    min|                0|
+|    max|               29|
++-------+-----------------+
+
+Root Mean Squared Error (RMSE) on test data = 3.4437
+R Squared Error (R2) on test data = 0.463966
+current cluster number is:  14
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|4.139072847682119E-4|
+| stddev|0.020340968364243987|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|2.394636015325670...|
+| stddev|0.015474611514754325|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0155934
+R Squared Error (R2) on test data = -0.0156526
+current cluster number is:  15
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|5.215323767476085|
+| stddev|4.173147659839462|
+|    min|                0|
+|    max|               39|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 5.175287356321839|
+| stddev|3.9413572438177424|
+|    min|                 0|
+|    max|                21|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.81307
+R Squared Error (R2) on test data = 0.490464
+current cluster number is:  16
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|              21744|
+|   mean|0.03237674760853569|
+| stddev|0.19878751840207448|
+|    min|                  0|
+|    max|                  3|
++-------+-------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.032567049808429116|
+| stddev|  0.1967221702546854|
+|    min|                   0|
+|    max|                   4|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.1965
+R Squared Error (R2) on test data = 0.00201835
+current cluster number is:  17
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|4.139072847682119E-4|
+| stddev|0.020340968364243994|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|2.394636015325670...|
+| stddev|0.015474611514754325|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0159315
+R Squared Error (R2) on test data = -0.0601724
+current cluster number is:  18
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|1.5837012509197939|
+| stddev|2.6377312360875305|
+|    min|                 0|
+|    max|                19|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|            2.3125|
+| stddev|3.0556980248646424|
+|    min|                 0|
+|    max|                18|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.64304
+R Squared Error (R2) on test data = 0.251677
+current cluster number is:  19
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|0.001379690949227...|
+| stddev| 0.03711941229401639|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.002634099616858...|
+| stddev| 0.05126197807555865|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0512944
+R Squared Error (R2) on test data = -0.00150702
+current cluster number is:  20
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|8.278145695364238E-4|
+| stddev| 0.02876051692426644|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|2.394636015325670...|
+| stddev|0.015474611514754327|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0155118
+R Squared Error (R2) on test data = -0.00505
+current cluster number is:  21
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|0.2946559970566593|
+| stddev|0.5693072136643261|
+|    min|                 0|
+|    max|                 5|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|0.3206417624521073|
+| stddev|0.5989333193072814|
+|    min|                 0|
+|    max|                 4|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.582967
+R Squared Error (R2) on test data = 0.0523789
+current cluster number is:  22
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|14.721946284032377|
+| stddev| 8.686268847283923|
+|    min|                 0|
+|    max|                68|
++-------+------------------+
+
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|             4176|
+|   mean|14.78639846743295|
+| stddev|8.039713812539162|
+|    min|                0|
+|    max|               42|
++-------+-----------------+
+
+Root Mean Squared Error (RMSE) on test data = 5.52929
+R Squared Error (R2) on test data = 0.526891
+current cluster number is:  23
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|0.3678715967623252|
+| stddev|0.6693806226285013|
+|    min|                 0|
+|    max|                 6|
++-------+------------------+
+
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|               4176|
+|   mean|0.41810344827586204|
+| stddev| 0.7037949108096192|
+|    min|                  0|
+|    max|                  5|
++-------+-------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.670583
+R Squared Error (R2) on test data = 0.0919355
+current cluster number is:  24
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|5.058866813833702E-4|
+| stddev|0.022486751986993663|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|2.394636015325670...|
+| stddev|0.015474611514754327|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0155678
+R Squared Error (R2) on test data = -0.01232
+current cluster number is:  25
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|2.026857983811626|
+| stddev|2.408709561605757|
+|    min|                0|
+|    max|               19|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 2.305795019157088|
+| stddev|2.3961296017519484|
+|    min|                 0|
+|    max|                18|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.26875
+R Squared Error (R2) on test data = 0.103281
+current cluster number is:  26
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|47.96780721118469|
+| stddev|33.94203300373465|
+|    min|                0|
+|    max|              145|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 47.18223180076628|
+| stddev|32.447796199856974|
+|    min|                 0|
+|    max|               185|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 16.6193
+R Squared Error (R2) on test data = 0.737602
+current cluster number is:  27
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean| 1.405721118469463|
+| stddev|1.8059615043000443|
+|    min|                 0|
+|    max|                14|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|1.5289750957854407|
+| stddev|1.8373695082369232|
+|    min|                 0|
+|    max|                10|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 1.65326
+R Squared Error (R2) on test data = 0.190174
+current cluster number is:  28
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|0.001379690949227...|
+| stddev| 0.03711941229401639|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.001197318007662...|
+| stddev|    0.03458570335612|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.034612
+R Squared Error (R2) on test data = -0.00176078
+current cluster number is:  29
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|6.422829286239883|
+| stddev|4.712887621598211|
+|    min|                0|
+|    max|               31|
++-------+-----------------+
+
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|             4176|
+|   mean|6.701867816091954|
+| stddev|4.641232167365203|
+|    min|                0|
+|    max|               26|
++-------+-----------------+
+
+Root Mean Squared Error (RMSE) on test data = 3.22981
+R Squared Error (R2) on test data = 0.515613
+current cluster number is:  30
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|0.030445180279617366|
+| stddev| 0.20501073663724248|
+|    min|                   0|
+|    max|                   5|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.040948275862068964|
+| stddev| 0.23266117062798577|
+|    min|                   0|
+|    max|                   3|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.235108
+R Squared Error (R2) on test data = -0.0213914
+current cluster number is:  31
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|9.657836644591612E-4|
+| stddev|0.031062763908197944|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.001915708812260...|
+| stddev|0.043732103143911114|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0437309
+R Squared Error (R2) on test data = -0.000182604
+current cluster number is:  32
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|17.287757542310523|
+| stddev|11.033792843470188|
+|    min|                 0|
+|    max|                88|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|15.873802681992338|
+| stddev| 9.815281913685828|
+|    min|                 0|
+|    max|                73|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 6.48176
+R Squared Error (R2) on test data = 0.563801
+current cluster number is:  33
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|4.816409124356144|
+| stddev| 3.81210914232209|
+|    min|                0|
+|    max|               43|
++-------+-----------------+
+
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|             4176|
+|   mean|4.317289272030651|
+| stddev|3.231899080750811|
+|    min|                0|
+|    max|               25|
++-------+-----------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.69773
+R Squared Error (R2) on test data = 0.303074
+current cluster number is:  34
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean|48.011313465783665|
+| stddev| 32.58131755248254|
+|    min|                 0|
+|    max|               207|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean| 44.75574712643678|
+| stddev|28.461596616013765|
+|    min|                 0|
+|    max|               182|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 15.413
+R Squared Error (R2) on test data = 0.706668
+current cluster number is:  35
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|6.898454746136866E-4|
+| stddev| 0.02625645241064239|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|4.789272030651341E-4|
+| stddev|0.021881784432778866|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0218871
+R Squared Error (R2) on test data = -0.000725795
+current cluster number is:  36
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|4.582735467255334|
+| stddev|4.351602764688442|
+|    min|                0|
+|    max|               41|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|  4.11566091954023|
+| stddev|3.6040275466611953|
+|    min|                 0|
+|    max|                22|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 2.67875
+R Squared Error (R2) on test data = 0.447423
+current cluster number is:  37
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|             21744|
+|   mean| 20.82349153789551|
+| stddev|11.396126913118243|
+|    min|                 0|
+|    max|                76|
++-------+------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|20.137452107279692|
+| stddev|10.647100220786793|
+|    min|                 0|
+|    max|                62|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 7.53878
+R Squared Error (R2) on test data = 0.498532
+current cluster number is:  38
++-------+-----------------+
+|summary|           demand|
++-------+-----------------+
+|  count|            21744|
+|   mean|17.51788999264165|
+| stddev|9.819623833136164|
+|    min|                0|
+|    max|              107|
++-------+-----------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|16.025862068965516|
+| stddev| 8.030946236917035|
+|    min|                 0|
+|    max|                56|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 6.33928
+R Squared Error (R2) on test data = 0.376768
+current cluster number is:  39
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|4.139072847682119E-4|
+| stddev|0.020340968364243983|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|2.394636015325670...|
+| stddev|0.015474611514754323|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0154783
+R Squared Error (R2) on test data = -0.000714755
+current cluster number is:  40
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|              21744|
+|   mean|0.31636313465783666|
+| stddev| 0.6144385621547331|
+|    min|                  0|
+|    max|                  7|
++-------+-------------------+
+
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|               4176|
+|   mean|0.43199233716475094|
+| stddev| 0.7133770280383885|
+|    min|                  0|
+|    max|                  5|
++-------+-------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.682095
+R Squared Error (R2) on test data = 0.0855584
+current cluster number is:  41
++-------+-------------------+
+|summary|             demand|
++-------+-------------------+
+|  count|              21744|
+|   mean|0.37118285504047094|
+| stddev| 0.7171714401263323|
+|    min|                  0|
+|    max|                 11|
++-------+-------------------+
+
++-------+------------------+
+|summary|            demand|
++-------+------------------+
+|  count|              4176|
+|   mean|0.3603927203065134|
+| stddev|0.6743564607483058|
+|    min|                 0|
+|    max|                 6|
++-------+------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.649302
+R Squared Error (R2) on test data = 0.0727026
+current cluster number is:  42
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|               21744|
+|   mean|4.139072847682119E-4|
+| stddev| 0.02034096836424399|
+|    min|                   0|
+|    max|                   1|
++-------+--------------------+
+
++-------+--------------------+
+|summary|              demand|
++-------+--------------------+
+|  count|                4176|
+|   mean|0.005986590038314...|
+| stddev| 0.08312797326947367|
+|    min|                   0|
+|    max|                   2|
++-------+--------------------+
+
+Root Mean Squared Error (RMSE) on test data = 0.0832452
+R Squared Error (R2) on test data = -0.00306155
+current cluster number is:  43

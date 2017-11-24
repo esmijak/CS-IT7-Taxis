@@ -1,0 +1,8 @@
+Training set contains 151 days i.e. 21744 time slots 
+Test set contains 30 days i.e. 4320 time slots 
+Cluster 0
+Training: 
+DataFrame[summary: string, demand: string]
+Testing: 
+DataFrame[summary: string, demand: string]
+
