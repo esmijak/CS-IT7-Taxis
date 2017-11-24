@@ -4,7 +4,6 @@ from schemas import *
 from pyspark.sql import *
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.colors import LogNorm
 from math import log
 
 spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
