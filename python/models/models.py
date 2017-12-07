@@ -2,10 +2,9 @@
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.regression import LinearRegression
-from .constants import *
+import dataformating as df
+import newEvaluation as ne
 
-from .newDataFormating import *
-from .newEvaluation import *
 
 def decisionTree(final_data_training, final_data_testing) :
     """  Model and predictions : """
@@ -22,15 +21,16 @@ def linearRegression(final_data_training, final_data_testing):
     return predictions
 
 
-final_data_training, final_data_testing = getFeatures()
-
-print('1. TeDy\n2.Lara')
-choice = int(input())
-if choice == 1 :
-    predictions = decisionTree(final_data_training, final_data_testing)
-    methodName = 'decision_tree'
-else:
-    predictions = linearRegression(final_data_training, final_data_testing)
-    methodName = 'linear_regression'
-
-evaluation (predictions, methodName)
+final_data_training, final_data_testing = df.getFeatures()
+while(1) :
+    print('1. TeDy\n2.Lara')
+    choice = int(input())
+    if choice == 1 :
+        predictions = decisionTree(final_data_training, final_data_testing)
+        methodName = 'decision_tree'
+    elif choice == 2:
+        predictions = linearRegression(final_data_training, final_data_testing)
+        methodName = 'linear_regression'
+    else:
+        break
+    ne.evaluation (predictions, methodName)

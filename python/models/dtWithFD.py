@@ -59,6 +59,8 @@ def getSlotInfo(slot_nb) :
     time_of_day_code = get_time_slot_per_day(hour, minute)
     return week, day, day_of_week, time_of_day_code, hour, minute
 
+
+
 for curCluster in range (N_OF_CLUSTERS):
 #for curCluster in cc: to test a specific cluster
     print('current cluster number is: ', curCluster)

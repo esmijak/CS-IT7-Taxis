@@ -61,73 +61,73 @@ class DemandCache:
             if DEMAND_CACHE_DEBUG:
                  print('Demand cache initialized')
 
-        def _fetch(self, tid):
-            res = self._spark.sql('SELECT * FROM final_features WHERE pickup_timeslot_id = {}'.format(tid))
-            tmp = {(row['pickup_timeslot_id'], row['origin']): row for row in res.collect()}
+        def _fetch(self, wid):
+            res = self._spark.sql('SELECT * FROM final_features WHERE week = {}'.format(wid))
+            tmp = {(row['week'], row['day_of_week'], row['time_of_day_code'], row['origin']): row for row in res.collect()}
             if DEMAND_CACHE_DEBUG:
-                print("Page {} fetched".format(tid))
+                print("Page {} fetched".format(wid))
             #if DEMAND_CACHE_UNPACK_DATAFRAMES:
                 #res = {cid: amount for (_, cid, amount) in res.collect()}
             return tmp
 
-        def _reinit(self, tid):
+        def _reinit(self, wid):
             if DEMAND_CACHE_DEBUG:
-                print('Reinitializing cache, fetching tids {} through {}'.format(tid, tid + CACHED_TIMESLOT_COUNT - 1))
-            self._start_tid = tid
+                print('Reinitializing cache, fetching wids {} through {}'.format(wid, wid + CACHED_TIMESLOT_COUNT - 1))
+            self._start_tid = wid
             self._current_page = self._fetch(self._start_tid)
             for page in self._next_pages:
                 del page
             self._next_pages = deque([])
             for i in range(1, CACHED_TIMESLOT_COUNT):
                 if DEMAND_CACHE_ASYNC:
-                    self._next_pages.append(self._exec.submit(self._fetch, tid + i))
+                    self._next_pages.append(self._exec.submit(self._fetch, wid + i))
                 else:
-                    self._next_pages.append(self._fetch(tid + i))
+                    self._next_pages.append(self._fetch(wid + i))
             if DEMAND_CACHE_DEBUG:
-                print('Reinitialization done. tid {} in memory, next {} in queue'.format(tid, len(self._next_pages)))
+                print('Reinitialization done. wid {} in memory, next {} in queue'.format(wid, len(self._next_pages)))
 
-        def _update_page(self, tid, cid):
+        def _update_page(self, wid, cid):
             if self._current_page is None:
-                self._reinit(tid)
-            elif tid == self._start_tid:
+                self._reinit(wid)
+            elif wid == self._start_tid:
                 if DEMAND_CACHE_DEBUG:
-                    print('DemandCache: Cache hit, tid {}'.format(tid))
-            elif tid == self._start_tid + 1:
+                    print('DemandCache: Cache hit, wid {}'.format(wid))
+            elif wid == self._start_tid + 1:
                 if len(self._next_pages) > 0:
                     if DEMAND_CACHE_DEBUG:
-                        print('Updating cache: Discarding tid {}, adding {} to the queue'.format(self._start_tid,
-                                                                                                 tid + CACHED_TIMESLOT_COUNT - 1))
+                        print('Updating cache: Discarding wid {}, adding {} to the queue'.format(self._start_tid,
+                                                                                                 wid + CACHED_TIMESLOT_COUNT - 1))
                     next = self._next_pages.popleft()
                     del self._current_page
                     tmp = next.result() if DEMAND_CACHE_ASYNC else next
                     self._current_page = tmp#{(row['pickup_timeslot_id'], row['origin']): row for row in tmp.collect()}
-                    self._start_tid = tid
+                    self._start_tid = wid
                     if DEMAND_CACHE_ASYNC:
-                        self._next_pages.append(self._exec.submit(self._fetch, tid + CACHED_TIMESLOT_COUNT - 1))
+                        self._next_pages.append(self._exec.submit(self._fetch, wid + CACHED_TIMESLOT_COUNT - 1))
                     else:
-                        self._next_pages.append(self._fetch(tid + CACHED_TIMESLOT_COUNT - 1))
+                        self._next_pages.append(self._fetch(wid + CACHED_TIMESLOT_COUNT - 1))
                 else:
                     print('DemandCache: Queue exhausted')
-                    self._reinit(tid)
+                    self._reinit(wid)
             else:
                 if DEMAND_CACHE_DEBUG:
                     print('DemandCache: Cache miss, had {} through {}, {} requested'.format(self._start_tid,
                                                                                             self._start_tid + CACHED_TIMESLOT_COUNT - 1,
-                                                                                            tid))
-                self._reinit(tid)
+                                                                                            wid))
+                self._reinit(wid)
 
-        def get_demand(self, tid, cid):
-            self._update_page(tid, cid)
+        def get_demand(self, wid, day_of_week, time_of_day_code, cid):
+            self._update_page(wid, cid)
             if DEMAND_CACHE_UNPACK_DATAFRAMES:
                 #return self._current_page.get(cid, 0)
-                return self._current_page.filter('pickup_timeslot_id = 0 AND origin = {}'.format(cid))
+                return self._current_page.filter('wid = {} AND day_of_week = {} AND time_of_day_code = {} AND origin = {}'.format(wid, day_of_week, time_of_day_code, cid))
             else:
                 #res = self._current_page.filter('pickup_timeslot_id = {} AND origin = {}'.format(tid, cid))
                 #return res.head() if res.count() > 0 else []
-                return self._current_page[(tid, cid)] if (tid, cid) in self._current_page.keys() else []
+                return self._current_page[(wid, day_of_week, time_of_day_code, cid)] if (wid, day_of_week, time_of_day_code, cid) in self._current_page.keys() else []
 
-        def hint(self, tid):
-            self._update_page(tid, 0)
+        def hint(self, wid):
+            self._update_page(wid, 0)
 
         def clear(self):
             del self._current_page
@@ -145,104 +145,4 @@ class DemandCache:
         return getattr(DemandCache.instance, item)
 
 
-class InvertedDemandCache:
-    class _Impl:
-        def __init__(self, spark, sqlCtx):
-            registerTable(sqlCtx, Table.FINAL_FEATURES)
-            self._spark = spark
-            self._exec = ThreadPoolExecutor(max_workers=3)
-            self._start_cid = -1
-            self._current_page = None
-            self._next_pages = deque([])
-            if DEMAND_CACHE_DEBUG:
-                 print('Demand cache initialized')
-
-        def _fetch(self, cid):
-            res = self._spark.sql('SELECT * FROM final_features WHERE origin = {}'.format(cid))
-            if DEMAND_CACHE_DEBUG:
-                print("Page {} fetched".format(cid))
-            if DEMAND_CACHE_UNPACK_DATAFRAMES:
-                res = {tid: amount for (tid, _, amount) in res.collect()}
-            return res
-
-        def _reinit(self, cid):
-            if DEMAND_CACHE_DEBUG:
-                print('Reinitializing cache, fetching cids {} through {}'.format(cid, cid + CACHED_TIMESLOT_COUNT - 1))
-            self._start_cid = cid
-            self._current_page = self._fetch(self._start_cid)
-            for page in self._next_pages:
-                del page
-            self._next_pages = deque([])
-            for i in range(1, CACHED_TIMESLOT_COUNT):
-                if DEMAND_CACHE_ASYNC:
-                    self._next_pages.append(self._exec.submit(self._fetch, cid + i))
-                else:
-                    self._next_pages.append(self._fetch(cid + i))
-            if DEMAND_CACHE_DEBUG:
-                print('Reinitialization done. cid {} in memory, next {} in queue'.format(cid, len(self._next_pages)))
-
-        def _update_page(self, tid, cid):
-            if self._current_page is None:
-                self._reinit(cid)
-            elif cid == self._start_cid:
-                if DEMAND_CACHE_DEBUG:
-                    print('DemandCache: Cache hit, cid {}'.format(cid))
-            elif cid == self._start_cid + 1:
-                if len(self._next_pages) > 0:
-                    if DEMAND_CACHE_DEBUG:
-                        print('Updating cache: Discarding tid {}, adding {} to the queue'.format(self._start_cid,
-                                                                                                 cid + CACHED_TIMESLOT_COUNT - 1))
-                    next = self._next_pages.popleft()
-                    del self._current_page
-                    self._current_page = next.result() if DEMAND_CACHE_ASYNC else next
-                    self._start_cid = cid
-                    if DEMAND_CACHE_ASYNC:
-                        self._next_pages.append(self._exec.submit(self._fetch, cid + CACHED_TIMESLOT_COUNT - 1))
-                    else:
-                        self._next_pages.append(self._fetch(cid + CACHED_TIMESLOT_COUNT - 1))
-                else:
-                    print('DemandCache: Queue exhausted')
-                    self._reinit(cid)
-            else:
-                if DEMAND_CACHE_DEBUG:
-                    print('DemandCache: Cache miss, had {} through {}, {} requested'.format(self._start_cid,
-                                                                                            self._start_cid + CACHED_TIMESLOT_COUNT - 1,
-                                                                                            cid))
-                self._reinit(cid)
-
-        def get_demand(self, tid, cid):
-            self._update_page(tid, cid)
-            if DEMAND_CACHE_UNPACK_DATAFRAMES:
-                return self._current_page.get(tid, 0)
-            else:
-                res = self._current_page.filter('pickup_timeslot_id = {} AND origin = {}'.format(tid, cid))
-                return res.head()['cnt'] if res.count() > 0 else 0
-
-        def hint(self, cid):
-            self._update_page(cid, 0)
-
-        def clear(self):
-            del self._current_page
-            self._current_page = None
-            for page in self._next_pages:
-                del page
-            self._next_pages = deque([])
-            self._start_cid = -1
-
-    instance = None
-    def init(self, spark, sqlCtx):
-        if DemandCache.instance is None:
-            DemandCache.instance = DemandCache._Impl(spark, sqlCtx)
-    def __getattr__(self, item):
-        return getattr(DemandCache.instance, item)
-
 demandCache = DemandCache()
-invDemandCache = InvertedDemandCache()
-
-def demandCacheStressTest(page_count, cluster_count):
-    global demandCache
-    def fn():
-        for tid in range(1, page_count):
-            for cid in range(1, cluster_count):
-                demandCache.get_demand(tid, cid)
-    print(timeit(fn, number=3))
