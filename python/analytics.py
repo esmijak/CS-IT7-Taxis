@@ -9,7 +9,9 @@ sqlCtx = SQLContext(spark.sparkContext, spark)
 
 
 def demandHistogram(**kwargs):
-    demand = [row[0] for row in loadDataFrame(sqlCtx, Table.DEMAND).select('cnt').collect()]
+    #df = loadDataFrame(sqlCtx, Table.DEMAND)
+    df = spark.read.parquet(hadoopify('clusters/demand500'))
+    demand = [row[0] for row in df.select('demand').filter('demand > 0').collect()]
     return demand, plt.hist(demand, **kwargs)
 
 
@@ -24,10 +26,10 @@ def pareto(n, alpha, xm):
     return [par(x) for x in range(0, n)]
 
 
-bins = 314
+bins = 1101
 
 demand, _ = demandHistogram(bins=bins, density=True)
-plt.plot(exponential(bins, 14.0))
+plt.plot(exponential(bins, 75.77))
 
 xm = amin(demand)
 alpha = len(demand) / sum([log(x, e) - log(xm, e) for x in demand])

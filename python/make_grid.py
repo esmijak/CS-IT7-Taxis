@@ -4,7 +4,7 @@ from schemas import *
 spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
-suffix = '_grid2500'
+suffix = '_ngrid2500'
 missing_value = None # Value which will be stored for locations outside of the grid. Should be an integer or None
 
 east = -74.15
@@ -48,8 +48,8 @@ mapped.createOrReplaceTempView('mapped')
 
 registerTable(sqlCtx, Table.TRIP_TIMES)
 combined = spark.sql("""
-SELECT mapped.trip_id AS trip_id, pickup_long_slot * {} + pickup_lat_slot AS pickup_cid,
-       dropoff_long_slot * {} + dropoff_lat_slot AS dropoff_cid, pickup_timeslot_id, dropoff_timeslot_id
+SELECT mapped.trip_id AS trip_id, pickup_long_slot, pickup_lat_slot,
+       dropoff_long_slot, dropoff_lat_slot, pickup_timeslot_id, dropoff_timeslot_id
 FROM mapped INNER JOIN trip_times ON (mapped.trip_id = trip_times.trip_id)
 WHERE     pickup_long_slot IS NOT NULL
       AND pickup_lat_slot IS NOT NULL
@@ -60,7 +60,7 @@ combined.write.mode('overwrite').parquet(hadoopify('grids/combined' + suffix))
 combined.createOrReplaceTempView('combined')
 
 demand = spark.sql("""
-SELECT pickup_timeslot_id, pickup_cid, COUNT(*) AS cnt
+SELECT pickup_timeslot_id, pickup_long_slot, pickup_lat_slot, COUNT(*) AS cnt
 FROM combined
-GROUP BY 1, 2""")
+GROUP BY 1, 2, 3""")
 demand.write.mode('overwrite').parquet(hadoopify('grids/demand' + suffix))

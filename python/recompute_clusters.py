@@ -13,7 +13,7 @@ import subprocess
 # This only affects the creation of the clusters; ALL rides will be assigned to a cluster.
 # Note that this amount of rows will be loaded into memory at once, and the clustering
 # will require a large amount of RAM if this number is very large.
-CLUSTERING_SIZE = 50000
+CLUSTERING_SIZE = 100000
 
 # This constant is the average amount of pickups per cluster.
 # That is, there will be CLUSTERING_SIZE / K_MEANS_FACTOR clusters.
@@ -46,8 +46,8 @@ print("K-means is done, clearing any existing data...")
 
 # Clean the database before proceeding
 
-subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/clusters/ride_clusters250"])
-subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/clusters/cluster_data250"])
+subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/clusters/ride_clusters400"])
+subprocess.call(["hadoop", "fs", "-rm", "-r", "-f", "/user/csit7/clusters/cluster_data400"])
 
 print("Done, initiating refill")
 
@@ -63,13 +63,13 @@ results = df.rdd.map(lambda r: Row(r['id'], predict(r['pickup_longitude'], r['pi
                                             predict(r['dropoff_longitude'], r['dropoff_latitude'])))
 
 sqlCtx.createDataFrame(results, schemaForTable(Table.RIDE_CLUSTERS))\
-    .write.save(hadoopify("clusters/ride_clusters250"), format="parquet", mode="overwrite")
+    .write.save(hadoopify("clusters/ride_clusters400"), format="parquet", mode="overwrite")
 
 clusterRows = []
 for i in range(0, len(clusters.clusterCenters)):
     center = clusters.clusterCenters[i]
     clusterRows.append(Row(i, center[0].item(), center[1].item()))
-spark.createDataFrame(clusterRows, schemaForTable(Table.CLUSTER_DATA)).write.save(hadoopify("clusters/cluster_data250"),
+spark.createDataFrame(clusterRows, schemaForTable(Table.CLUSTER_DATA)).write.save(hadoopify("clusters/cluster_data400"),
                                               format="parquet", mode="overwrite")
 
 print("All done, cleaning up and exiting")
