@@ -1,8 +1,21 @@
 from schemas import *
 
-def get_features_for_cluster(sqlCtx, cluster, split_train_test=True):
-    df = loadDataFrame(sqlCtx, Table.FINAL_DATA).filter('origin = {}'.format(cluster)).orderBy('origin')\
+def get_features_for_cluster(spark, cluster, split_train_test=True):
+    df = spark.read.parquet(hadoopify('final_features')).filter('origin = {}'.format(cluster)).orderBy('origin')\
         .drop('origin', 'pickup_timeslot_id')
+    if split_train_test:
+        train = df.filter('week < 23')
+        test = df.filter('week >= 23')
+
+        return (train.drop('amount').collect(), [row[0] for row in train.select('amount').collect()]), \
+               (test.drop('amount').collect(), [row[0] for row in test.select('amount').collect()])
+
+    return df.drop('amount').collect(), [row[0] for row in df.select('amount').collect()]
+
+def get_features_for_grid(spark, lat, long, split_train_test=True):
+    df = spark.read.parquet(hadoopify('grids/final_features_grid')).filter('pickup_lat_slot = {}'.format(lat))\
+        .filter('pickup_long_slot = {}'.format(long)).orderBy('pickup_lat_slot')\
+        .drop('pickup_lat_slot', 'pickup_long_slot', 'pickup_timeslot_id')
     if split_train_test:
         train = df.filter('week < 23')
         test = df.filter('week >= 23')

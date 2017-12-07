@@ -78,19 +78,39 @@ def rddBasedNeuralNet(feature_tuple, **kwargs):
 #mapped = data.map(lambda tup: rddBasedNeuralNet(tup, layers=(5,5), max_iter=1000))
 #print(mapped.count())
 
-registerTable(sqlCtx, Table.FINAL_FEATURES)
-clusters = [row[0] for row in spark.sql("SELECT DISTINCT origin FROM final_features").collect()]
-results = {}
-r2 = []
-rmse = []
-for cluster in clusters:
-    (tr_f, tr_l), (te_f, te_l) = get_features_for_cluster(sqlCtx, cluster)
-    res = newNeuralNet(tr_f, tr_l, te_f, te_l, layers=(10, 10), max_iter=1000)
-    if res is not None:
-        _r2, _rmse = res
-        results[cluster] = (_r2, _rmse)
-        r2.append(_r2)
-        rmse.append(_rmse)
+def doClusters():
+    registerTable(sqlCtx, Table.FINAL_FEATURES)
+    clusters = [row[0] for row in spark.sql("SELECT DISTINCT origin FROM final_features").collect()]
+    results = {}
+    r2 = []
+    rmse = []
+    for cluster in clusters:
+        (tr_f, tr_l), (te_f, te_l) = get_features_for_cluster(spark, cluster)
+        res = newNeuralNet(tr_f, tr_l, te_f, te_l, layers=(10, 10), max_iter=1000)
+        if res is not None:
+            _r2, _rmse = res
+            results[cluster] = (_r2, _rmse)
+            r2.append(_r2)
+            rmse.append(_rmse)
+    return results, r2, rmse
+
+def doGrid():
+    grid_data = getGridData(sqlCtx, '_ngrid2500')
+    results = {}
+    r2 = []
+    rmse = []
+    for x in range(grid_data['horizontal_slots']):
+        for y in range(grid_data['vertical_slots']):
+            (tr_f, tr_l), (te_f, te_l) = get_features_for_grid(spark, x, y)
+            res = newNeuralNet(tr_f, tr_l, te_f, te_l, layers=(5,), max_iter=2000)
+            if res is not None:
+                _r2, _rmse = res
+                results[(x, y)] = (_r2, _rmse)
+                r2.append(_r2)
+                rmse.append(_rmse)
+    return results, r2, rmse
+
+results, r2, rmse = doGrid()
 
 print(results)
 
