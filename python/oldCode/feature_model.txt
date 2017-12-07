@@ -1,0 +1,20 @@
+Training set contains 151 days i.e. 21744 time slots 
+Test set contains 30 days i.e. 4320 time slots 
+cluster number :0
+RMSE is 0.0
+R2 is nan
+Training set contains 151 days i.e. 21744 time slots 
+Test set contains 30 days i.e. 4320 time slots 
+cluster number :1
+RMSE is 0.0
+R2 is nan
+Training set contains 151 days i.e. 21744 time slots 
+Test set contains 30 days i.e. 4320 time slots 
+cluster number :2
+RMSE is 0.0
+R2 is nan
+Training set contains 151 days i.e. 21744 time slots 
+Test set contains 30 days i.e. 4320 time slots 
+cluster number :3
+RMSE is 0.0
+R2 is nan

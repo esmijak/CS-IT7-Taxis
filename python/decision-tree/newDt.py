@@ -17,7 +17,7 @@ N_DAYS_FEB = 28
 N_DAYS_MAR = 31
 N_DAYS_APR = 30
 N_DAYS_MAY = 31
-N_DAYS_JUN = 30
+N_DAYS_JUN = 29
 FIRST_DAY_DAY_OF_WEEK = 3   # which day of the week was the first day of the year 2015 (0 - Monday, 1 - Tuesday, etc.)
 N_DAYS_TRAIN = N_DAYS_JAN + N_DAYS_FEB + N_DAYS_MAR + N_DAYS_APR + N_DAYS_MAY # number of days used for the learning
 N_OF_TIME_SLOTS_TRAIN = N_DAYS_TRAIN * TIME_SLOTS_WITHIN_DAY # number of time slots that are being used for training
@@ -53,6 +53,7 @@ registerTable(sqlCtx, Table.DEMAND)
 registerTable(sqlCtx, Table.TIME_SLOTS)
 """ df is data frame containing the time slot id, demand"""
 df = spark.sql('SELECT pickup_timeslot_id, pickup_cid, cnt, from, to FROM demand INNER JOIN time_slots ON (pickup_timeslot_id = id) ORDER BY 1,2')
+
 #df.show(10)
 
 errorsRMSE = []
