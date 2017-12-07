@@ -3,7 +3,7 @@ from pyspark.sql import *
 from schemas import *
 from demand_cache import invDemandCache
 from pyspark.ml.feature import VectorAssembler
-from pyspark.ml.regression import DecisionTreeRegressor
+from pyspark.ml.regression import LinearRegression
 from pyspark.ml.evaluation import RegressionEvaluator
 import datetime
 
@@ -101,7 +101,7 @@ for curCluster in range (N_OF_CLUSTERS):
             elif slot_nb < demandSlot :
                 demand = 0
             else :
-                #print('coucou should not come here: ', slot_nb, demandSlot)
+                print('coucou should not come here: ', slot_nb, demandSlot)
                 demand = 0
         else:
             demand = 0
@@ -135,33 +135,32 @@ for curCluster in range (N_OF_CLUSTERS):
 
 
     """  Model and predictions : """
-    decisionTree = DecisionTreeRegressor(labelCol='demand', maxDepth=3)
-    dt_model = decisionTree.fit(final_data_training)
-    predictions = dt_model.transform(final_data_testing)
+    linearRegression = LinearRegression(labelCol='demand')
+    lr_model = linearRegression.fit(final_data_training)
+    predictions = lr_model.evaluate(final_data_testing)
+
     #print("Decision tree model max depth = %g" % decisionTree.getMaxDepth())
     #print(dt_model.toDebugString)
 
 
     """ Evaluation rmse : """
-    evaluatorRMSE = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="rmse")
-    rmse = evaluatorRMSE.evaluate(predictions)
+    rmse = predictions.rootMeanSquaredError
     errorsRMSE.append(rmse)
     print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
 
-    evaluatorR2 = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="r2")
-    r2 = evaluatorR2.evaluate(predictions)
+    r2 = predictions.r2
     errorsR2.append(r2)
     print("R Squared Error (R2) on test data = %g" % r2)
 
 
 """ Writing the errors in the files : """
-file = open("decision_tree_rmse.txt", "w")
+file = open("linear_regression_rmse.txt", "w")
 file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. "+ str(N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains "+ str(N_DAYS_TEST)+ " days i.e. "+ str(N_OF_TIME_SLOTS_TEST) + " time slots \n")
 for errorIndex in range(N_OF_CLUSTERS):
     file.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE[errorIndex]) + "\n")
 file.close()
 
-file = open("decision_tree_r2.txt", "w")
+file = open("linear_regression_r2.txt", "w")
 file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. "+ str(N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains "+ str(N_DAYS_TEST)+ " days i.e. "+ str(N_OF_TIME_SLOTS_TEST) + " time slots \n")
 for errorIndex in range(N_OF_CLUSTERS):
     file.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2[errorIndex]) + "\n")

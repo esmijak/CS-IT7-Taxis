@@ -1,65 +1,157 @@
 #!/usr/bin/python3
 
 from pyspark.sql import *
-from demand_cache import demandCache
+from get_features import *
+from pyspark.ml.evaluation import RegressionEvaluator
+import os
+import math
+
+os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3.6"
 
 N_OF_CLUSTERS = 10   # number of clusters for which mean is being calculated
-N_OF_TIME_SLOTS = 14400  # number of time slots that are being used for training
-TIME_SLOTS_WITHIN_DAY = 144     # day is divided into that number of slots
-THRESHOLD = 5   # difference between predicted and actual number of rides within
-                # which the prediction is classified as correct
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+"""Time related constant: """
+TIME_SLOTS_WITHIN_DAY = 144     # day is divided into that number of slots
+N_DAYS_JAN = 31
+N_DAYS_FEB = 28
+N_DAYS_MAR = 31
+N_DAYS_APR = 30
+N_DAYS_MAY = 31
+N_DAYS_JUN = 30
+FIRST_DAY_DAY_OF_WEEK = 3   # which day of the week was the first day of the year 2015 (0 - Monday, 1 - Tuesday, etc.)
+N_DAYS_TRAIN = N_DAYS_JAN + N_DAYS_FEB + N_DAYS_MAR + N_DAYS_APR + N_DAYS_MAY # number of days used for the learning
+N_OF_TIME_SLOTS_TRAIN = N_DAYS_TRAIN * TIME_SLOTS_WITHIN_DAY # number of time slots that are being used for training
+N_DAYS_TEST = N_DAYS_JUN
+N_OF_TIME_SLOTS_TEST = N_DAYS_TEST * TIME_SLOTS_WITHIN_DAY
+
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
-demandCache.init(spark, sqlCtx)
+def means_all():
+    all_test_features = []
+    all_test_labels = []
 
-# initializing dir in which means are stored in format (cluster_id, time_of_day, weekday)
-data = {}
-for day_time in range(0, TIME_SLOTS_WITHIN_DAY):
-    for weekday in range(0, 7):
-        for cid in range(0, N_OF_CLUSTERS):
-            data[(cid, day_time, weekday)] = 0
+    cluster_weekday_hour_means = []
 
-# initializing how much each of days in week has passed
-n_of_days = {}
-for i in range(0, 7):
-    n_of_days[i] = 0
+    for i in range(N_OF_CLUSTERS):
+        (train_features, train_labels), (test_features, test_labels) = get_features_for_cluster(sqlCtx, i)
+        all_test_features += test_features
+        all_test_labels += test_labels
 
-# collecting overall demand by time of the day and weekday
-day = -1    # day within a week
-for tid in range(0, N_OF_TIME_SLOTS):   # we must figure out the total value of time slots
-    if tid % TIME_SLOTS_WITHIN_DAY == 0:
-        day = (day + 1) % 7
-        n_of_days[day] += 1
-    for cid in range(0, N_OF_CLUSTERS):
-        demand = demandCache.get_demand(tid, cid)
-        data[(cid, tid % TIME_SLOTS_WITHIN_DAY, day)] += demand
-    print(str(tid))
+        if len(train_labels) == 0:
+            continue
 
-# here we get the means and write them in the file
-f = open("means2.txt", "w")
-for day_time in range(0, TIME_SLOTS_WITHIN_DAY):
-    for weekday in range(0, 7):
-        for cid in range(0, N_OF_CLUSTERS):
-            data[(cid, day_time, weekday)] /= n_of_days[weekday]
-            f.write(str(cid) + " " + str(day_time) + " " + str(weekday) + " " + str(data[(cid, day_time, weekday)]) + "\n")
-f.close()
+        weekday_hours_means = []
+        train_labels_features = list(zip(train_labels, train_features))
 
-# here we are going to evaluate mean prediction on the following day (first day which data isn't taken
-# for the training set) -----> E.G. Prediction for tomorrow
-predictions = {}
-cnt = 0
-next_day = (day + 1) % 7
-for tid in range(N_OF_TIME_SLOTS, N_OF_TIME_SLOTS + TIME_SLOTS_WITHIN_DAY):
-    for cid in range(0, N_OF_CLUSTERS):
-        demand = demandCache.get_demand(tid, cid)
-        prediction = data[(cid, tid % TIME_SLOTS_WITHIN_DAY, next_day)]
-    if abs(demand - prediction) <= THRESHOLD:
-        cnt += 1
-    predictions[tid % TIME_SLOTS_WITHIN_DAY] = demand - prediction
+        for week_day in range(7):
+            hours_means = []
+            for hour in range(24):
+                demands_of_weekday_hour = list(
+                    filter(lambda x: x[1].day_of_week == week_day + 3 and x[1].hour == hour, train_labels_features))
+                demands_of_weekday_hour = list(map(lambda y: y[0], demands_of_weekday_hour))
+                if len(demands_of_weekday_hour) == 0:
+                    hours_means.append(0.0)
+                else:
+                    hours_means.append(sum(demands_of_weekday_hour) / len(demands_of_weekday_hour))
+            weekday_hours_means.append(hours_means)
+
+        cluster_weekday_hour_means.append(weekday_hours_means)
+
+    weekday_hours_means = []
+    for week_day in range(7):
+        hours_means = []
+        for hour in range(24):
+            hour_sum = 0.0
+            for i in range(len(cluster_weekday_hour_means)):
+                hour_sum += cluster_weekday_hour_means[i][week_day][hour]
+            hours_means.append(hour_sum/24)
+        weekday_hours_means.append(hours_means)
+
+    predictions = []
+    for features in all_test_features:
+        weekday = features.day_of_week - 3
+        prediction = weekday_hours_means[weekday][features.hour]
+        predictions.append(prediction)
+
+    # merge actual_demand and predictions to dataframe for RegressionEvaluator
+    dataframe = spark.createDataFrame(zip(all_test_labels, predictions), ["demand", "prediction"])
+
+    """ Evaluation rmse : """
+    evaluatorRMSE = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="rmse")
+    rmse = evaluatorRMSE.evaluate(dataframe)
+    print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
+
+    """ Evaluation r2 : """
+    evaluatorR2 = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="r2")
+    r2 = evaluatorR2.evaluate(dataframe)
+    print("R Squared Error (R2) on test data = %g" % r2)
 
 
-print("Model is right in " + str(cnt/TIME_SLOTS_WITHIN_DAY) + "% of cases.")
+def means_clusters():
+    errorsRMSE = []
+    errorsR2 = []
 
-# print(predictions)
+    for i in range(N_OF_CLUSTERS):
+        (train_features, train_labels), (test_features, test_labels) = get_features_for_cluster(sqlCtx, i)
+
+        if len(test_labels) == 0:
+            errorsRMSE.append(-10.0)
+            errorsR2.append(-10.0)
+            continue
+
+        # init model
+        weekday_hours_means = []
+
+        train_labels_features = list(zip(train_labels, train_features))
+
+        # train
+        for week_day in range(7):
+            hours_means = []
+            for hour in range(24):
+                demands_of_weekday_hour = list(filter(lambda x: x[1].day_of_week == week_day + 3 and x[1].hour == hour, train_labels_features))
+                demands_of_weekday_hour = list(map(lambda y: y[0], demands_of_weekday_hour))
+                if len(demands_of_weekday_hour) == 0:
+                    hours_means.append(0.0)
+                else:
+                    hours_means.append(sum(demands_of_weekday_hour)/len(demands_of_weekday_hour))
+            weekday_hours_means.append(hours_means)
+
+        # predict for each set of test features
+        predictions = []
+        for features in test_features:
+            weekday = features.day_of_week - 3
+            prediction = weekday_hours_means[weekday][features.hour]
+            predictions.append(prediction)
+
+
+        # merge actual_demand and predictions to dataframe for RegressionEvaluator
+        dataframe = spark.createDataFrame(zip(test_labels, predictions), ["demand", "prediction"])
+
+        """ Evaluation rmse : """
+        evaluatorRMSE = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="rmse")
+        rmse = evaluatorRMSE.evaluate(dataframe)
+        errorsRMSE.append(rmse)
+        print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
+
+        """ Evaluation r2 : """
+        evaluatorR2 = RegressionEvaluator(labelCol="demand", predictionCol="prediction", metricName="r2")
+        r2 = evaluatorR2.evaluate(dataframe)
+        errorsR2.append(r2)
+        print("R Squared Error (R2) on test data = %g" % r2)
+
+
+    """ Writing the errors in the files : """
+    file = open("means_weekday_hour_rmse.txt", "w")
+    file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. "+ str(N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains "+ str(N_DAYS_TEST)+ " days i.e. "+ str(N_OF_TIME_SLOTS_TEST) + " time slots \n")
+    for errorIndex in range(N_OF_CLUSTERS):
+        file.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE[errorIndex]) + "\n")
+    file.close()
+
+    file = open("means_weekday_hour_r2.txt", "w")
+    file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. "+ str(N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains "+ str(N_DAYS_TEST)+ " days i.e. "+ str(N_OF_TIME_SLOTS_TEST) + " time slots \n")
+    for errorIndex in range(N_OF_CLUSTERS):
+        file.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2[errorIndex]) + "\n")
+    file.close()
+
+means_all()

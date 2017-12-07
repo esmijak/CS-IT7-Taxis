@@ -8,7 +8,7 @@ from pyspark.ml.evaluation import RegressionEvaluator
 import datetime
 
 """Cluster related constant: """
-N_OF_CLUSTERS = 358   # number of clusters used : all of them
+N_OF_CLUSTERS = 1000   # number of clusters used : all of them
 
 """Time related constant: """
 TIME_SLOTS_WITHIN_DAY = 144     # day is divided into that number of slots
@@ -29,7 +29,7 @@ N_OF_TIME_SLOTS_TEST =  N_DAYS_TEST * TIME_SLOTS_WITHIN_DAY
 spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
-demandTable = loadDataFrame(sqlCtx, Table.DEMAND_SAMPLE)
+demandTable = loadDataFrame(sqlCtx, Table.FINAL_DATA)
 #demandTable.show(10)
 slotsTable = loadDataFrame(sqlCtx, Table.TIME_SLOTS)
 slotsTableCol = slotsTable.collect()
@@ -42,30 +42,24 @@ start_time = datetime.datetime(2015, 1, 1, 0).timestamp()
 def find_slot(time):
     return int((time.timestamp() - start_time) / time_per_slot)
 
-def get_time_slot_per_day(hour, minute):
-    nb_minute_slot = minute / 10
-    time_slot_per_hour = 6
-    slot_nb_day = hour * time_slot_per_hour + nb_minute_slot
-    return slot_nb_day
-
 """Tables requests: """
-registerTable(sqlCtx, Table.DEMAND)
+registerTable(sqlCtx, Table.FINAL_DATA)
 registerTable(sqlCtx, Table.TIME_SLOTS)
 """ df is data frame containing the time slot id, demand"""
-df = spark.sql('SELECT pickup_timeslot_id, pickup_cid, cnt, from, to FROM demand INNER JOIN time_slots ON (pickup_timeslot_id = id) ORDER BY 1,2')
-#df.show(10)
+df = spark.sql('SELECT pickup_timeslot_id, origin, amount, time_of_day_code,hour,minute FROM FINAL_DATA ORDER BY 1,2')
+df.show(10)
 
 errorsRMSE = []
 errorsR2 = []
-
-#cc = [253] cluster to test
 for curCluster in range (N_OF_CLUSTERS):
-#for curCluster in cc: to test a specific cluster
     print('current cluster number is: ', curCluster)
 
     """ df is data frame containing the time slot id, demand for the current cluster"""
-    df_for_one_cluster = df[df.pickup_cid == curCluster].select('pickup_timeslot_id', 'cnt')
+    df_for_one_cluster = df[df.origin == curCluster].select('pickup_timeslot_id', 'amount')
     #df_for_one_cluster.show()
+
+
+
 
     demandListDict = df_for_one_cluster.collect()
     #ld_size = round(0.7 * slot_count)
@@ -74,13 +68,11 @@ for curCluster in range (N_OF_CLUSTERS):
     rows_testing = []
     demandCount = 0
     TOTAL_SLOTS_FOR_LOOP = N_OF_TIME_SLOTS_TEST + N_OF_TIME_SLOTS_TRAIN
-    #print('total time slots in loop: ', TOTAL_SLOTS_FOR_LOOP)
+    print('total time slots in loop: ', TOTAL_SLOTS_FOR_LOOP)
     for instance in slotsTableCol :
-
         slot_nb = find_slot(instance[0])
         """Test whether the training and testing sets are filled with the aimed number of instances."""
-        if slot_nb > TOTAL_SLOTS_FOR_LOOP - 1:#  or demandCount > len(demandListDict) - 1:
-            #print('slot nb', slot_nb, 'demC:', demandCount, ' li: ', len(demandListDict))
+        if slot_nb > TOTAL_SLOTS_FOR_LOOP - 1  or demandCount > len(demandListDict) - 1:
             break
         """Compute the time slot information: """
         weekday = instance[0].weekday()
@@ -88,33 +80,27 @@ for curCluster in range (N_OF_CLUSTERS):
         week_nb =  instance[0].isocalendar()[1]
         hour = instance[0].hour
         minute = instance[0].minute
+        """Extract the demand of the given time slot for the current cluster: """
+        demandDict = demandListDict[demandCount].asDict()
+        demandSlot = demandDict['pickup_timeslot_id']
 
-        if (demandCount < len(demandListDict)):
-            """Extract the demand of the given time slot for the current cluster: """
-            demandDict = demandListDict[demandCount].asDict()
-            demandSlot = demandDict['pickup_timeslot_id']
-
-            """Since the table doesn't take into account the demand that are = 0: """
-            if slot_nb == demandSlot :
-                demand = demandDict['cnt']
-                demandCount += 1
-            elif slot_nb < demandSlot :
-                demand = 0
-            else :
-                #print('coucou should not come here: ', slot_nb, demandSlot)
-                demand = 0
-        else:
+        """Since the table doesn't take into account the demand that are = 0: """
+        if slot_nb == demandSlot :
+            demand = demandDict['cnt']
+            demandCount += 1
+        elif slot_nb < demandSlot :
+            demand = 0
+        else :
+            print('coucou should not come here: ', slot_nb, demandSlot)
             demand = 0
 
         """Add the current instance to the right test: """
-        slot_nb_day = get_time_slot_per_day(hour, minute)
         if (len(rows_training) < N_OF_TIME_SLOTS_TRAIN):
-            rows_training.append((slot_nb_day, weekday, day, week_nb, hour, minute, demand))
+            rows_training.append((slot_nb, weekday, day, week_nb, hour, minute, demand))
         else:
-            rows_testing.append((slot_nb_day, weekday, day, week_nb, hour, minute, demand))
+            rows_testing.append((slot_nb, weekday, day, week_nb, hour, minute, demand))
 
-
-    #print('train rows len: ', len(rows_training), 'test rows len: ', len(rows_testing))
+    print('train rows len: ', len(rows_training), 'test rows len: ', len(rows_testing))
 
     """Create 2 dataframes corresponding to the training and testing set previously computed: """
     df_training = spark.createDataFrame(rows_training, ["slot_id", "day_of_week", "day_of_month", "week_nb", "hour", "minute", "demand"])
@@ -133,13 +119,21 @@ for curCluster in range (N_OF_CLUSTERS):
     final_data_testing.describe().show()
 
 
-
-    """  Model and predictions : """
+    """  Model and predictions :
     decisionTree = DecisionTreeRegressor(labelCol='demand', maxDepth=3)
     dt_model = decisionTree.fit(final_data_training)
     predictions = dt_model.transform(final_data_testing)
-    #print("Decision tree model max depth = %g" % decisionTree.getMaxDepth())
-    #print(dt_model.toDebugString)
+    print("Decision tree model max depth = %g" % decisionTree.getMaxDepth())
+    print(dt_model.toDebugString)"""
+
+    linearR = LinearRegression(labelCol='demand')
+    lr_model = linearR.fit(final_data_training)
+    predictions = lr_model.transform(final_data_testing)
+    print("Linear Regression model max depth = %g" % linearR.getMaxDepth())
+    print(lr_model.toDebugString)
+
+
+
 
 
     """ Evaluation rmse : """
@@ -152,7 +146,6 @@ for curCluster in range (N_OF_CLUSTERS):
     r2 = evaluatorR2.evaluate(predictions)
     errorsR2.append(r2)
     print("R Squared Error (R2) on test data = %g" % r2)
-
 
 """ Writing the errors in the files : """
 file = open("decision_tree_rmse.txt", "w")

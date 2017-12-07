@@ -7,8 +7,9 @@ from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.evaluation import RegressionEvaluator
 import datetime
 
+
 """Cluster related constant: """
-N_OF_CLUSTERS = 358   # number of clusters used : all of them
+N_OF_CLUSTERS = 1000   # number of clusters used : all of them
 
 """Time related constant: """
 TIME_SLOTS_WITHIN_DAY = 144     # day is divided into that number of slots
@@ -25,22 +26,21 @@ N_DAYS_TEST = N_DAYS_JUN
 N_OF_TIME_SLOTS_TEST =  N_DAYS_TEST * TIME_SLOTS_WITHIN_DAY
 
 
+
+
+
 """Spark initialization: """
 spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
-demandTable = loadDataFrame(sqlCtx, Table.DEMAND_SAMPLE)
-#demandTable.show(10)
+featuresTable = loadDataFrame(sqlCtx, Table.FINAL_DATA)
 slotsTable = loadDataFrame(sqlCtx, Table.TIME_SLOTS)
 slotsTableCol = slotsTable.collect()
-#slotsTable.show()
+registerTable(sqlCtx, Table.TIME_SLOTS)
 
-slot_count = len(slotsTableCol)
-time_per_slot = (60 * 60 * 24 * 180) / slot_count
-start_time = datetime.datetime(2015, 1, 1, 0).timestamp()
 
-def find_slot(time):
-    return int((time.timestamp() - start_time) / time_per_slot)
+errorsRMSE = []
+errorsR2 = []
 
 def get_time_slot_per_day(hour, minute):
     nb_minute_slot = minute / 10
@@ -48,73 +48,68 @@ def get_time_slot_per_day(hour, minute):
     slot_nb_day = hour * time_slot_per_hour + nb_minute_slot
     return slot_nb_day
 
-"""Tables requests: """
-registerTable(sqlCtx, Table.DEMAND)
-registerTable(sqlCtx, Table.TIME_SLOTS)
-""" df is data frame containing the time slot id, demand"""
-df = spark.sql('SELECT pickup_timeslot_id, pickup_cid, cnt, from, to FROM demand INNER JOIN time_slots ON (pickup_timeslot_id = id) ORDER BY 1,2')
-#df.show(10)
+def getSlotInfo(slot_nb) :
+    df_slot = slotsTable[slotsTable.id == slot_nb].select('from').collect()
+    test = df_slot[0]
+    day_of_week = test[0].weekday()
+    day = test[0].day
+    week = test[0].isocalendar()[1]
+    hour = test[0].hour
+    minute = test[0].minute
+    time_of_day_code = get_time_slot_per_day(hour, minute)
+    return week, day, day_of_week, time_of_day_code, hour, minute
 
-errorsRMSE = []
-errorsR2 = []
-
-#cc = [253] cluster to test
 for curCluster in range (N_OF_CLUSTERS):
 #for curCluster in cc: to test a specific cluster
     print('current cluster number is: ', curCluster)
 
     """ df is data frame containing the time slot id, demand for the current cluster"""
-    df_for_one_cluster = df[df.pickup_cid == curCluster].select('pickup_timeslot_id', 'cnt')
+    df_for_one_cluster = featuresTable[featuresTable.origin == curCluster].select('month','week','day','day_of_week','time_of_day_code','hour','minute','origin','amount','pickup_timeslot_id')
     #df_for_one_cluster.show()
 
-    demandListDict = df_for_one_cluster.collect()
-    #ld_size = round(0.7 * slot_count)
+    print("data downloaded!")
+
+    #demandListDict = df_for_one_cluster.collect()
 
     rows_training = []
     rows_testing = []
     demandCount = 0
     TOTAL_SLOTS_FOR_LOOP = N_OF_TIME_SLOTS_TEST + N_OF_TIME_SLOTS_TRAIN
-    #print('total time slots in loop: ', TOTAL_SLOTS_FOR_LOOP)
-    for instance in slotsTableCol :
+    print('total time slots in loop: ', TOTAL_SLOTS_FOR_LOOP)
+    for curSlotNb in range (TOTAL_SLOTS_FOR_LOOP) :
+        if curSlotNb % 1000 == 0 :
+            print('cur slot: ', curSlotNb)
+        df_for_one_cluster_for_one_ts = df_for_one_cluster[featuresTable.pickup_timeslot_id == curSlotNb].select('week',
+                                                                                                       'day',
+                                                                                                       'day_of_week',
+                                                                                                       'time_of_day_code',
+                                                                                                       'hour', 'minute',
+                                                                                                       'origin',
+                                                                                                       'amount',
+                                                                                                       'pickup_timeslot_id')
+        df_for_one_cluster_for_one_ts_col = df_for_one_cluster_for_one_ts.collect()
 
-        slot_nb = find_slot(instance[0])
-        """Test whether the training and testing sets are filled with the aimed number of instances."""
-        if slot_nb > TOTAL_SLOTS_FOR_LOOP - 1:#  or demandCount > len(demandListDict) - 1:
-            #print('slot nb', slot_nb, 'demC:', demandCount, ' li: ', len(demandListDict))
-            break
-        """Compute the time slot information: """
-        weekday = instance[0].weekday()
-        day = instance[0].day
-        week_nb =  instance[0].isocalendar()[1]
-        hour = instance[0].hour
-        minute = instance[0].minute
-
-        if (demandCount < len(demandListDict)):
-            """Extract the demand of the given time slot for the current cluster: """
-            demandDict = demandListDict[demandCount].asDict()
-            demandSlot = demandDict['pickup_timeslot_id']
-
-            """Since the table doesn't take into account the demand that are = 0: """
-            if slot_nb == demandSlot :
-                demand = demandDict['cnt']
-                demandCount += 1
-            elif slot_nb < demandSlot :
-                demand = 0
-            else :
-                #print('coucou should not come here: ', slot_nb, demandSlot)
-                demand = 0
-        else:
+        if len(df_for_one_cluster_for_one_ts_col) < 1 :
+            week, day, day_of_week, time_of_day_code, hour, minute = getSlotInfo(curSlotNb)
             demand = 0
 
-        """Add the current instance to the right test: """
-        slot_nb_day = get_time_slot_per_day(hour, minute)
+        else :
+            """Compute the time slot information: """
+            weekday = df_for_one_cluster_for_one_ts_col[0].day_of_week
+            day = df_for_one_cluster_for_one_ts[0].day
+            week_nb =  df_for_one_cluster_for_one_ts[0].week
+            hour = df_for_one_cluster_for_one_ts[0].hour
+            minute = df_for_one_cluster_for_one_ts[0].minute
+            demand = df_for_one_cluster_for_one_ts[0].amount
+            slot_nb_day = df_for_one_cluster_for_one_ts[0].time_of_day_code
+
         if (len(rows_training) < N_OF_TIME_SLOTS_TRAIN):
             rows_training.append((slot_nb_day, weekday, day, week_nb, hour, minute, demand))
         else:
             rows_testing.append((slot_nb_day, weekday, day, week_nb, hour, minute, demand))
 
 
-    #print('train rows len: ', len(rows_training), 'test rows len: ', len(rows_testing))
+    print('train rows len: ', len(rows_training), 'test rows len: ', len(rows_testing))
 
     """Create 2 dataframes corresponding to the training and testing set previously computed: """
     df_training = spark.createDataFrame(rows_training, ["slot_id", "day_of_week", "day_of_month", "week_nb", "hour", "minute", "demand"])
