@@ -103,6 +103,20 @@ featureSchema = StructType([
   StructField("amount", IntegerType(), False)
 ])
 
+featureSchemaGrid = StructType([
+  StructField("time_of_day_code", IntegerType(), False),
+  StructField("day_of_week", IntegerType(), False),
+  StructField("day", IntegerType(), False),
+  StructField("week", IntegerType(), False),
+  StructField("hour", IntegerType(), False),
+  StructField("minute", IntegerType(), False),
+  StructField("pickup_lat_slot", IntegerType(), False),
+  StructField("pickup_long_slot", IntegerType(), False),
+  StructField("is_manhattan", BooleanType(), False),
+  StructField("is_airport", BooleanType(), False),
+  StructField("amount", IntegerType(), False)
+])
+
 class Table(Enum):
   COMBINED_DATA = auto()
   CLUSTER_DATA = auto()
@@ -115,6 +129,7 @@ class Table(Enum):
   FINAL_DATA = auto()
   FINAL_DATA_500 = auto()
   FINAL_FEATURES = auto()
+  FINAL_FEATURES_GRID = auto()
 
   COMBINED_DATA_SAMPLE = auto()
   CLUSTER_DATA_SAMPLE = auto()
@@ -144,6 +159,8 @@ def tableName(tab):
     return "final_data"
   elif tab is Table.FINAL_FEATURES:
     return "final_features"
+  elif tab is Table.FINAL_FEATURES_GRID:
+    return "grids/final_features_grid"
   elif tab is Table.FINAL_DATA_500:
     return "clusters/final_data500"
   elif tab is Table.COMBINED_DATA_SAMPLE:
@@ -174,6 +191,8 @@ def schemaForTable(tab):
     return finalDataSchema
   elif tab is Table.FINAL_FEATURES:
     return featureSchema
+  elif tab is Table.FINAL_FEATURES_GRID:
+    return featureSchemaGrid
   elif tab is Table.TRIP_TIMES or tab is Table.TRIP_TIMES_SAMPLE:
     return tripTimeSchema
   elif tab is Table.RAW_DATA or tab is Table.RAW_DATA_SAMPLE:
