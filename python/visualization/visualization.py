@@ -103,7 +103,7 @@ def points_demand():
     plt.show()
 
 
-def centroid_demand(normalization=0):
+def centroid_demand():
     registerTable(sqlCtx, Table.CLUSTER_DATA)
     registerTable(sqlCtx, Table.RIDE_CLUSTERS)
 
@@ -113,13 +113,12 @@ def centroid_demand(normalization=0):
                      "FROM ride_clusters GROUP BY pickup_cid) AS rides "
                      "INNER JOIN "
                      "cluster_data ON rides.pickup_cid = cluster_data.ride_id "
+                     "WHERE rides.pickup_cid < 360 "
                      ).collect()
 
     centroidsX = list(map(lambda row: row['cetroid_long'], data))
     centroidsY = list(map(lambda row: row['centroid_lat'], data))
     count = list(map(lambda row: 2**log(row['count'], 10), data))
-    if normalization != 0:
-        count = list(map(lambda c: normalization if c > normalization else c, count))
 
     my_map = Basemap(projection='merc', lat_0=40.78, lon_0=-73.96,
                      resolution='h', area_thresh=1,
@@ -140,6 +139,50 @@ def centroid_demand(normalization=0):
     plt.show()
 
 
+def grid_demand():
+    grid = spark.read.parquet(hadoopify('grids/final_features_grid'))
+    grid.registerTempTable("grid")
+
+    data = spark.sql("SELECT pickup_long_slot, pickup_lat_slot, COUNT(*) AS count "
+                     "FROM grid "
+                     "GROUP BY pickup_long_slot, pickup_lat_slot "
+                     ).collect()
+    east = -74.15
+    west = -73.72
+    south = 40.58
+    north = 40.85
+
+    horizontal_slots = 25
+    vertical_slots = 25
+
+    longitude_step = (west - east) / float(horizontal_slots)
+    latitude_step = (north - south) / float(vertical_slots)
+
+    gridX = list(map(lambda row: row['pickup_long_slot'], data))
+    gridX = list(map(lambda x: x*longitude_step + east, gridX))
+    gridY = list(map(lambda row: row['pickup_lat_slot'], data))
+    gridY = list(map(lambda y: y*latitude_step + south, gridY))
+    count = list(map(lambda row: 2**log(row['count'], 10), data))
+
+    my_map = Basemap(projection='merc', lat_0=40.78, lon_0=-73.96,
+                     resolution='f', area_thresh=1,
+                     llcrnrlon=-74.20, llcrnrlat=40.55,
+                     urcrnrlon=-73.68, urcrnrlat=40.95)
+
+    my_map.drawcountries()
+    my_map.fillcontinents(color='#d4d4d4', lake_color='#a7cdf2', zorder=0)
+    my_map.drawcoastlines()
+    my_map.drawmapboundary(fill_color='#a7cdf2')
+
+    my_map.readshapefile('./geo_export_84b991a0-49f4-4c35-a58a-f770d4bb88fc', '1', zorder=1)
+
+    x, y = my_map(gridX, gridY)
+    my_map.scatter(x, y, c=count, marker="o", cmap=cm.autumn_r, alpha=1, zorder=2)
+    my_map.colorbar()
+
+    plt.show()
+
+
 # call visualizations here
 # https://data.cityofnewyork.us/api/geospatial/xr67-eavy?method=export&format=Shapefile
 # For map visualization, download this file first (shapefile of NYC streets)
@@ -149,4 +192,4 @@ def centroid_demand(normalization=0):
 # weekday_demand()
 # weekly_demand()
 #points_demand()
-centroid_demand(1000000000)
+grid_demand()
