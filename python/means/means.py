@@ -4,13 +4,12 @@ from pyspark.sql import *
 from get_features import *
 from pyspark.ml.evaluation import RegressionEvaluator
 import os
+import make_grid
 import get_features
 
-os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3.6"
+from numpy import arange
 
 N_OF_CLUSTERS = 358  # number of clusters for which mean is being calculated
-
-# 358
 
 """Time related constant: """
 TIME_SLOTS_WITHIN_DAY = 144  # day is divided into that number of slots
@@ -33,6 +32,7 @@ sqlCtx = SQLContext(spark.sparkContext, spark)
 rmses = []
 r2s = []
 
+
 # Get count of weekdays in the training set
 WEEKDAY_DAYS_COUNT = []
 
@@ -48,9 +48,9 @@ for i in range(FIRST_DAY_DAY_OF_WEEK, 7):
 for i in range((N_DAYS_TRAIN - (7 - FIRST_DAY_DAY_OF_WEEK)) % 7):
     WEEKDAY_DAYS_COUNT[i] += 1
 
+
 # Get count of weekdays in the testing set
 TEST_WEEKDAY_DAYS_COUNT = []
-
 for i in range(7):
     TEST_WEEKDAY_DAYS_COUNT.append((N_DAYS_TEST - (7 - FIRST_DAY_OF_TEST)) / 7)
 for i in range(FIRST_DAY_OF_TEST, 7):
@@ -58,7 +58,9 @@ for i in range(FIRST_DAY_OF_TEST, 7):
 for i in range((N_DAYS_TEST - (7 - FIRST_DAY_OF_TEST)) % 7):
     TEST_WEEKDAY_DAYS_COUNT[i] += 1
 
+
 registerTable(sqlCtx, Table.FINAL_DATA)
+registerTable(sqlCtx, Table.FINAL_FEATURES_GRID)
 
 
 def means_weekday_hour():
@@ -109,97 +111,6 @@ def means_weekday_hour():
         eval(predictions, test_labels)
 
     write_to_files("means_weekday_hour")
-
-
-def means_hour():
-    rmses.clear()
-    r2s.clear()
-
-    hours_means = [0 for i in range(24)]
-    for hour in range(24):
-        data = spark.sql("SELECT SUM(amount) AS amount "
-                         "FROM final_data" +
-                         " WHERE month < 5 AND hour = " + str(hour) + " AND origin < " + str(N_OF_CLUSTERS)
-                         ).collect()
-        if data[0]["amount"] is None:
-            amount = 0
-        else:
-            amount = data[0]["amount"]
-
-        hours_means[hour] = 1.0 * amount / (N_DAYS_TRAIN * 6 * N_OF_CLUSTERS)
-
-    for cid in range(N_OF_CLUSTERS):
-        test_labels = []
-        test_features = []
-
-        for hour in range(24):
-            data = spark.sql("SELECT amount "
-                             "FROM final_data " +
-                             "WHERE month = 5 AND hour=" + str(hour) +
-                             " AND origin = " + str(cid)).collect()
-            amounts = list(map(lambda row: row['amount'], data))
-            while len(amounts) < 6 * N_DAYS_TEST:
-                amounts.append(0)
-
-            test_labels.extend(amounts)
-            test_features.extend([hour for i in range(len(amounts))])
-
-        predictions = []
-        for features in test_features:
-            prediction = hours_means[features]
-            predictions.append(prediction)
-        eval(predictions, test_labels)
-
-    write_to_files("means_hour")
-
-
-def means_weekday():
-    rmses.clear()
-    r2s.clear()
-
-    weekday_means = [0 for i in range(7)]
-
-    for week_day in range(7):
-        data = spark.sql("SELECT SUM(amount) AS amount "
-                         "FROM final_data" +
-                         " WHERE month < 5 AND day_of_week = " + str(week_day + 3) +
-                         " AND origin < " + str(N_OF_CLUSTERS)
-                         ).collect()
-        if data[0]["amount"] is None:
-            amount = 0
-        else:
-            amount = data[0]["amount"]
-        weekday_means[week_day] = 1.0 * amount / (WEEKDAY_DAYS_COUNT[week_day] * 24 * 6 * N_OF_CLUSTERS)
-
-    for cid in range(N_OF_CLUSTERS):
-        test_labels = []
-        test_features = []
-
-        week_day = FIRST_DAY_OF_TEST
-        for day in range(1, N_DAYS_TEST + 1):
-            for hour in range(24):
-                data = spark.sql("SELECT amount "
-                                 "FROM final_data " +
-                                 "WHERE month = 5 AND day = " + str(day) +
-                                 " AND origin = " + str(cid)).collect()
-                amounts = list(map(lambda row: row['amount'], data))
-                while len(amounts) < 6*24:
-                    amounts.append(0)
-                test_labels.extend(amounts)
-
-                test_features.extend([week_day for i in range(len(amounts))])
-
-            week_day += 1
-            if week_day == 7:
-                week_day = 0
-
-        predictions = []
-        for features in test_features:
-            prediction = weekday_means[features]
-            predictions.append(prediction)
-        eval(predictions, test_labels)
-
-    write_to_files("means_weekday")
 
 
 def means_clusters_weekday_hour():
@@ -253,116 +164,35 @@ def means_clusters_weekday_hour():
     write_to_files("means_clusters_weekday_hour")
 
 
-def means_clusters_weekday():
+def means_grid_weekday_hour():
     rmses.clear()
     r2s.clear()
 
-    cluster_weekday_means = [[0 for i in range(7)] for j in range(N_OF_CLUSTERS)]
+    for x in arange(make_grid.north, make_grid.south + 0.001, make_grid.latitude_step):
+        for y in arange(make_grid.east, make_grid.west + 0.001, make_grid.longitude_step):
+            (train_features, train_labels), (test_features, test_labels) = get_features.get_features_for_grid(spark, x, y)
 
-    for cid in range(N_OF_CLUSTERS):
-        for week_day in range(7):
-            data = spark.sql("SELECT SUM(amount) AS amount "
-                             "FROM final_data " +
-                             "WHERE month < 5 AND day_of_week = " + str(week_day + 3) +
-                             " AND origin = " + str(cid)
-                             ).collect()
-            if data[0]["amount"] is None:
-                amount = 0
-            else:
-                amount = data[0]["amount"]
-            cluster_weekday_means[cid][week_day] = 1.0 * amount / (WEEKDAY_DAYS_COUNT[week_day] * 6 * 24)
+            weekday_hours_means = [[0 for i in range(24)] for j in range(7)]
+            train_labels_features = list(zip(train_labels, train_features))
 
-    for cid in range(N_OF_CLUSTERS):
-        test_labels = []
-        test_features = []
+            for week_day in range(7):
+                hour_means = []
 
-        week_day = FIRST_DAY_OF_TEST
-        for day in range(1, N_DAYS_TEST + 1):
-            data = spark.sql("SELECT amount "
-                             "FROM final_data " +
-                             "WHERE month = 5 AND day = " + str(day) +
-                             " AND origin = " + str(cid)).collect()
-            amounts = list(map(lambda row: row['amount'], data))
-            while len(amounts) < 6*24:
-                amounts.append(0)
-            test_labels.extend(amounts)
+                for hour in range(24):
+                    weekday_hour_sum = list(filter(lambda row: row[1].day_of_week == week_day and row[1].hour == hour, train_labels_features))
+                    weekday_hour_sum = sum(list(map(lambda row: row[0], weekday_hour_sum)))
 
-            test_features.extend([week_day for i in range(len(amounts))])
+                    hour_means.append(weekday_hour_sum / WEEKDAY_DAYS_COUNT[week_day])
 
-            week_day += 1
-            if week_day == 7:
-                week_day = 0
+                weekday_hours_means.append(hour_means)
 
-        predictions = []
-        for features in test_features:
-            prediction = cluster_weekday_means[cid][features]
-            predictions.append(prediction)
-        eval(predictions, test_labels)
+            predictions = []
+            for features in test_features:
+                predictions.append(weekday_hours_means[features.day_of_week][features.hour])
 
-    write_to_files("means_clusters_weekday_hour")
+            eval(predictions, test_labels)
 
-
-def means_clusters_hour():
-    rmses.clear()
-    r2s.clear()
-
-    cluster_hours_means = [[0 for i in range(24)] for j in range(N_OF_CLUSTERS)]
-
-    for cid in range(N_OF_CLUSTERS):
-        for hour in range(24):
-            data = spark.sql("SELECT SUM(amount) AS amount "
-                             "FROM final_data " +
-                             "WHERE month < 5 AND hour = " + str(hour) +
-                             " AND origin = " + str(cid)
-                             ).collect()
-            if data[0]["amount"] is None:
-                amount = 0
-            else:
-                amount = data[0]["amount"]
-            cluster_hours_means[cid][hour] = 1.0 * amount / (N_DAYS_TRAIN * 6)
-
-    for cid in range(N_OF_CLUSTERS):
-        test_labels = []
-        test_features = []
-
-        for hour in range(24):
-            data = spark.sql("SELECT amount "
-                             "FROM final_data " +
-                             "WHERE month = 5 AND hour = " + str(hour) +
-                             " AND origin = " + str(cid)).collect()
-            amounts = list(map(lambda row: row['amount'], data))
-            while len(amounts) < N_DAYS_TEST * 6:
-                amounts.append(0)
-            test_labels.extend(amounts)
-
-            test_features.extend([hour for i in range(len(amounts))])
-
-        predictions = []
-        for features in test_features:
-            prediction = cluster_hours_means[cid][features]
-            predictions.append(prediction)
-        eval(predictions, test_labels)
-
-    write_to_files("clusters_hour")
-
-
-def means_clusters():
-    rmses.clear()
-    r2s.clear()
-
-    for i in range(N_OF_CLUSTERS):
-        (train_features, train_labels), (test_features, test_labels) = get_features_for_cluster(sqlCtx, i)
-
-        mean = sum(train_labels) / N_OF_TIME_SLOTS_TRAIN
-
-        while len(test_labels) < N_OF_TIME_SLOTS_TEST:
-            test_labels.append(0)
-
-        predictions = [mean for i in range(len(test_labels))]
-
-        eval(predictions, test_labels)
-
-    write_to_files("clusters")
+    write_to_files("grid_weekday_hour", "grid")
 
 
 def eval(predicted, actual):
@@ -383,25 +213,29 @@ def eval(predicted, actual):
     r2s.append(r2)
 
 
-def write_to_files(method):
+def write_to_files(method, partition = "cluster"):
     """ Writing the errors in the files : """
     file = open(method + "_rmse.txt", "w")
     file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains " + str(N_DAYS_TEST) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TEST) + " time slots \n")
-    for errorIndex in range(N_OF_CLUSTERS):
-        file.write("RMSE for cluster " + str(errorIndex) + " is " + str(rmses[errorIndex]) + "\n")
+
+    if (partition == "cluster"):
+        err_count = N_OF_CLUSTERS
+    else:
+        err_count = make_grid.horizontal_slots * make_grid.vertical_slots
+
+    for errorIndex in range(err_count):
+        file.write("RMSE for " + partition + " " + str(errorIndex) + " is " + str(rmses[errorIndex]) + "\n")
     file.close()
 
     file = open(method + "_r2.txt", "w")
     file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains " + str(N_DAYS_TEST) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TEST) + " time slots \n")
-    for errorIndex in range(N_OF_CLUSTERS):
-        file.write("R2 for cluster " + str(errorIndex) + " is " + str(r2s[errorIndex]) + "\n")
+    for errorIndex in range(err_count):
+        file.write("R2 for " + partition + " " + str(errorIndex) + " is " + str(r2s[errorIndex]) + "\n")
     file.close()
 
-
-means_clusters_weekday_hour()
-means_clusters()
-
+os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3.6"
+means_grid_weekday_hour()
