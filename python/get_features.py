@@ -13,8 +13,8 @@ def get_features_for_cluster(spark, cluster, split_train_test=True):
     return df.drop('amount').collect(), [row[0] for row in df.select('amount').collect()]
 
 def get_features_for_grid(spark, lat, long, split_train_test=True):
-    df = spark.read.parquet(hadoopify('grids/final_features_grid')).filter('pickup_lat_slot = {}'.format(lat))\
-        .filter('pickup_long_slot = {}'.format(long)).orderBy('pickup_lat_slot')\
+    df = spark.read.parquet(hadoopify('grids/final_with_zero/{}_{}'.format(long, lat)))\
+        .orderBy('pickup_lat_slot')\
         .drop('pickup_lat_slot', 'pickup_long_slot', 'pickup_timeslot_id')
     if split_train_test:
         train = df.filter('week < 23')
