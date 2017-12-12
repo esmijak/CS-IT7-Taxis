@@ -1,66 +1,66 @@
 DT maxDepth 3 : 
-DecisionTreeRegressionModel (uid=DecisionTreeRegressor_4ea2b4e9ddf6d953b670) of depth 3 with 9 nodes
+DecisionTreeRegressionModel (uid=DecisionTreeRegressor_4a65a8297cc569a39c93) of depth 3 with 9 nodes
   If (feature 2 <= 2.0)
    Predict: 0.0
   Else (feature 2 > 2.0)
-   If (feature 5 <= 6.0)
-    If (feature 0 <= 9.0)
-     Predict: 6.524929837167997
-    Else (feature 0 > 9.0)
-     Predict: 3.798029134440024
-   Else (feature 5 > 6.0)
-    If (feature 1 <= 172.0)
-     Predict: 9.482927127901993
-    Else (feature 1 > 172.0)
-     Predict: 12.544496587467256
+   If (feature 8 <= 0.0)
+    If (feature 0 <= 41.0)
+     Predict: 5.203788318944417
+    Else (feature 0 > 41.0)
+     Predict: 12.656735328103773
+   Else (feature 8 > 0.0)
+    If (feature 0 <= 73.0)
+     Predict: 0.5238376187710823
+    Else (feature 0 > 73.0)
+     Predict: 1.4548689508786898
 DT maxDepth 5 : 
-DecisionTreeRegressionModel (uid=DecisionTreeRegressor_426f8c904ce434187989) of depth 5 with 33 nodes
+DecisionTreeRegressionModel (uid=DecisionTreeRegressor_4b828812d214ba34e5c1) of depth 5 with 33 nodes
   If (feature 2 <= 2.0)
    Predict: 0.0
   Else (feature 2 > 2.0)
-   If (feature 5 <= 6.0)
-    If (feature 0 <= 9.0)
-     If (feature 2 <= 5.0)
-      If (feature 0 <= 4.0)
-       Predict: 5.944917949370309
-      Else (feature 0 > 4.0)
-       Predict: 4.076746336149685
-     Else (feature 2 > 5.0)
-      If (feature 1 <= 298.0)
-       Predict: 9.754650887573964
-      Else (feature 1 > 298.0)
-       Predict: 16.77063774684364
-    Else (feature 0 > 9.0)
-     If (feature 5 <= 5.0)
+   If (feature 8 <= 0.0)
+    If (feature 0 <= 41.0)
+     If (feature 0 <= 8.0)
       If (feature 2 <= 5.0)
-       Predict: 2.5508023221652874
+       Predict: 5.975846931562346
       Else (feature 2 > 5.0)
-       Predict: 5.041185250127856
-     Else (feature 5 > 5.0)
-      If (feature 2 <= 5.0)
-       Predict: 7.473982003272132
-      Else (feature 2 > 5.0)
-       Predict: 3.0689647200258934
-   Else (feature 5 > 6.0)
-    If (feature 1 <= 172.0)
-     If (feature 1 <= 153.0)
-      If (feature 1 <= 140.0)
-       Predict: 9.206880589831687
-      Else (feature 1 > 140.0)
-       Predict: 20.60111901979532
-     Else (feature 1 > 153.0)
-      If (feature 1 <= 163.0)
-       Predict: 1.2929864253393666
-      Else (feature 1 > 163.0)
-       Predict: 6.311876958131586
-    Else (feature 1 > 172.0)
-     If (feature 1 <= 196.0)
-      If (feature 4 <= 1.0)
-       Predict: 14.921440689025186
-      Else (feature 4 > 1.0)
-       Predict: 22.50339329414436
-     Else (feature 1 > 196.0)
-      If (feature 1 <= 230.0)
-       Predict: 6.643391317908586
-      Else (feature 1 > 230.0)
-       Predict: 12.240536007794313
+       Predict: 12.885097073162328
+     Else (feature 0 > 8.0)
+      If (feature 0 <= 37.0)
+       Predict: 3.969625131129174
+      Else (feature 0 > 37.0)
+       Predict: 8.078176933028162
+    Else (feature 0 > 41.0)
+     If (feature 1 <= 173.0)
+      If (feature 1 <= 154.0)
+       Predict: 11.209519569930475
+      Else (feature 1 > 154.0)
+       Predict: 4.928104243776302
+     Else (feature 1 > 173.0)
+      If (feature 1 <= 197.0)
+       Predict: 29.519502894882702
+      Else (feature 1 > 197.0)
+       Predict: 12.870877752055616
+   Else (feature 8 > 0.0)
+    If (feature 0 <= 73.0)
+     If (feature 5 <= 4.0)
+      If (feature 5 <= 0.0)
+       Predict: 0.7484140492031565
+      Else (feature 5 > 0.0)
+       Predict: 0.14508335562093252
+     Else (feature 5 > 4.0)
+      If (feature 1 <= 118.0)
+       Predict: 0.39662982820877557
+      Else (feature 1 > 118.0)
+       Predict: 0.8273185015891155
+    Else (feature 0 > 73.0)
+     If (feature 1 <= 185.0)
+      If (feature 1 <= 141.0)
+       Predict: 1.2946606166086525
+      Else (feature 1 > 141.0)
+       Predict: 0.32490210181411333
+     Else (feature 1 > 185.0)
+      If (feature 1 <= 322.0)
+       Predict: 1.8307131666780192
+      Else (feature 1 > 322.0)
+       Predict: 0.8820818514251365

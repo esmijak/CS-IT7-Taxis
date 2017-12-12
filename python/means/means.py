@@ -9,6 +9,8 @@ import get_features
 
 from numpy import arange
 
+os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3.6"
+
 N_OF_CLUSTERS = 358  # number of clusters for which mean is being calculated
 
 """Time related constant: """
@@ -237,5 +239,4 @@ def write_to_files(method, partition = "cluster"):
         file.write("R2 for " + partition + " " + str(errorIndex) + " is " + str(r2s[errorIndex]) + "\n")
     file.close()
 
-os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3.6"
-means_grid_weekday_hour()
+means_weekday_hour()

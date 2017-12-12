@@ -56,15 +56,15 @@ def main():
                         time_of_day_code, origin, day_of_week, day, week, hour, minute, is_manhattan, is_airport, amount = extract_feature(curFeature)
 
                         if (week_nb < WEEK_NB_TEST):
-                            rows_training.append((time_of_day_code, origin,day_of_week, day, week, hour, minute, amount))
+                            rows_training.append((time_of_day_code, origin,day_of_week, day, week, hour, minute, is_manhattan, is_airport, amount))
                         else:
-                            rows_testing[cid].append((time_of_day_code, origin,day_of_week, day, week, hour, minute, amount))
+                            rows_testing[cid].append((time_of_day_code, origin,day_of_week, day, week, hour, minute, is_manhattan, is_airport, amount))
 
     df_training = spark.createDataFrame(rows_training,
-                               ["time_of_day_code", "origin", "day_of_week", "day", "week", "hour", "minute", "amount"])
+                               ["time_of_day_code", "origin", "day_of_week", "day", "week", "hour", "minute", "is_manhattan", "is_airport", "amount"])
 
     assembler = VectorAssembler(inputCols=["time_of_day_code", "origin", "day_of_week", "day", "week", "hour",
-                                             "minute"],
+                                             "minute", "is_manhattan", "is_airport"],
                                     outputCol='features')
     output_training = assembler.transform(df_training)
 
@@ -86,7 +86,7 @@ def main():
     file = open("DT_final_features_one_model_INFO.txt", "w")
     file.write("DT maxDepth 3 : \n" + dt_model.toDebugString)
     file.write("DT maxDepth 5 : \n"+ dt_model5.toDebugString)
-    file.close
+    file.close()
 
 
     linearRegression = LinearRegression(labelCol='amount')
@@ -96,7 +96,7 @@ def main():
         print('cluster: ', cid)
         df_testing = spark.createDataFrame(rows_testing[cid],
                                            ["time_of_day_code", "origin", "day_of_week", "day", "week", "hour",
-                                            "minute", "amount"])
+                                            "minute", "is_manhattan", "is_airport", "amount"])
         #df_testing.show()
         output_testing = assembler.transform(df_testing)
         final_data_testing = output_testing.select('features', 'amount')
@@ -132,48 +132,42 @@ def main():
 
 errorsRMSE_LR, errorsR2_LR, errorsRMSE_DT, errorsR2_DT, errorsRMSE_DT5, errorsR2_DT5 = main()
 
-""" Writing the errors in the files : """
-N_WEEK_TRAIN = WEEK_NB_TEST - 1
-N_TS_TRAIN = N_WEEK_TRAIN * DAY_IN_WEEK * TIME_SLOTS_WITHIN_DAY
-N_WEEK_TEST = LAST_WEEK - N_WEEK_TRAIN
-N_TS_TEST = N_WEEK_TEST * DAY_IN_WEEK * TIME_SLOTS_WITHIN_DAY
+
+def writing_error(errorsRMSE_LR, errorsR2_LR, errorsRMSE_DT, errorsR2_DT, errorsRMSE_DT5, errorsR2_DT5) :
+    """ Writing the errors in the files : """
+    N_WEEK_TRAIN = WEEK_NB_TEST - 1
+    N_TS_TRAIN = N_WEEK_TRAIN * DAY_IN_WEEK * TIME_SLOTS_WITHIN_DAY
+    N_WEEK_TEST = LAST_WEEK - N_WEEK_TRAIN
+    N_TS_TEST = N_WEEK_TEST * DAY_IN_WEEK * TIME_SLOTS_WITHIN_DAY
 
 
-file = open("decision_tree_rmse_final_features_one_model.txt", "w")
-file.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
-for errorIndex in range(N_OF_CLUSTERS):
-    file.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE_DT[errorIndex]) + "\n")
-file.close()
-
-file = open("decision_tree_r2_final_features_one_model.txt", "w")
-file.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
-for errorIndex in range(N_OF_CLUSTERS):
-    file.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2_DT[errorIndex]) + "\n")
-file.close()
-
-file = open("decision_tree5_rmse_final_features_one_model.txt", "w")
-file.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
-for errorIndex in range(N_OF_CLUSTERS):
-    file.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE_DT5[errorIndex]) + "\n")
-file.close()
-
-file = open("decision_tree5_r2_final_features_one_model.txt", "w")
-file.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
-for errorIndex in range(N_OF_CLUSTERS):
-    file.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2_DT5[errorIndex]) + "\n")
-file.close()
+    file_DT_rmse = open("decision_tree_rmse_final_features_one_model_12_12.txt", "w")
+    file_DT_r2 = open("decision_tree_r2_final_features_one_model_12_12.txt", "w")
+    file_DT5_rmse = open("decision_tree5_rmse_final_features_one_model_12_12.txt", "w")
+    file_DT5_r2 = open("decision_tree5_r2_final_features_one_model_12_12.txt", "w")
+    file_LR_rmse = open("linear_regression_rmse_final_features_one_model_12_12.txt", "w")
+    file_LR_r2 = open("linear_regression_r2_final_features_one_model_12_12.txt", "w")
 
 
-""" Writing the errors in the files : """
-file = open("linear_regression_rmse_final_features_one_model.txt", "w")
-file.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
-for errorIndex in range(N_OF_CLUSTERS):
-    file.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE_LR[errorIndex]) + "\n")
-file.close()
+    file_DT_rmse.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
+    file_DT_r2.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
+    file_DT5_rmse.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
+    file_DT5_r2.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
+    file_LR_rmse.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
+    file_LR_r2.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
 
-file = open("linear_regression_r2_final_features_one_model.txt", "w")
-file.write("Training set contains " + str(N_WEEK_TRAIN) + " weeks i.e. "+ str(N_TS_TRAIN) + " time slots \nTest set contains "+ str(N_WEEK_TEST)+ " weeks i.e. "+ str(N_TS_TEST) + " time slots \n")
-for errorIndex in range(N_OF_CLUSTERS):
-    file.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2_LR[errorIndex]) + "\n")
-file.close
+    for errorIndex in range(N_OF_CLUSTERS):
+        file_DT_rmse.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE_DT[errorIndex]) + "\n")
+        file_DT_r2.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2_DT[errorIndex]) + "\n")
+        file_DT5_rmse.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE_DT5[errorIndex]) + "\n")
+        file_DT5_r2.write("R2 for cluster " + str(errorIndex) + " is " + str(errorsR2_DT5[errorIndex]) + "\n")
+        file_LR_rmse.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsRMSE_LR[errorIndex]) + "\n")
+        file_LR_r2.write("RMSE for cluster " + str(errorIndex) + " is " + str(errorsR2_LR[errorIndex]) + "\n")
+
+    file_DT_rmse.close()
+    file_DT_r2.close()
+    file_DT5_rmse.close()
+    file_DT5_r2.close()
+    file_LR_rmse.close()
+    file_LR_r2.close()
 
