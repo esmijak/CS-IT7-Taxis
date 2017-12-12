@@ -1,0 +1,3 @@
+Training set contains 22 weeks i.e. 22176 time slots 
+Test set contains 5 weeks i.e. 5040 time slots 
+R2 for cluster 0 is 0.04330789643852728

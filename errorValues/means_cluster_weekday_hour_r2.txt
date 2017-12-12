@@ -1,0 +1,5 @@
+Training set contains 151 days i.e. 21744 time slots 
+Test set contains 29 days i.e. 4176 time slots 
+R2 for cluster 0 is 0.33786177444745635
+R2 for cluster 1 is 0.5306974523170442
+R2 for cluster 2 is -inf

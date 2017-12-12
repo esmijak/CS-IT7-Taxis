@@ -96,22 +96,22 @@ def main():
         """ Evaluation rmse : """
         rmse = predictionsLR.rootMeanSquaredError
         errorsRMSE_LR.append(rmse)
-        print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
+        print("Root Mean Squared Error (RMSE) for LR on test data = %g" % rmse)
 
         r2 = predictionsLR.r2
         errorsR2_LR.append(r2)
-        print("R Squared Error (R2) on test data = %g" % r2)
+        print("R Squared Error (R2) for LR on test data = %g" % r2)
 
         """ Evaluation rmse : """
         evaluatorRMSE = RegressionEvaluator(labelCol="amount", predictionCol="prediction", metricName="rmse")
         rmse = evaluatorRMSE.evaluate(predictionsDT)
         errorsRMSE_DT.append(rmse)
-        print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
+        print("Root Mean Squared Error (RMSE) for DT on test data = %g" % rmse)
 
         evaluatorR2 = RegressionEvaluator(labelCol="amount", predictionCol="prediction", metricName="r2")
         r2 = evaluatorR2.evaluate(predictionsDT)
         errorsR2_DT.append(r2)
-        print("R Squared Error (R2) on test data = %g" % r2)
+        print("R Squared Error (R2) for DT on test data = %g" % r2)
 
 main()
 
