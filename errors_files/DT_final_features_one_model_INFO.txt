@@ -1,0 +1,66 @@
+DT maxDepth 3 : 
+DecisionTreeRegressionModel (uid=DecisionTreeRegressor_4a65a8297cc569a39c93) of depth 3 with 9 nodes
+  If (feature 2 <= 2.0)
+   Predict: 0.0
+  Else (feature 2 > 2.0)
+   If (feature 8 <= 0.0)
+    If (feature 0 <= 41.0)
+     Predict: 5.203788318944417
+    Else (feature 0 > 41.0)
+     Predict: 12.656735328103773
+   Else (feature 8 > 0.0)
+    If (feature 0 <= 73.0)
+     Predict: 0.5238376187710823
+    Else (feature 0 > 73.0)
+     Predict: 1.4548689508786898
+DT maxDepth 5 : 
+DecisionTreeRegressionModel (uid=DecisionTreeRegressor_4b828812d214ba34e5c1) of depth 5 with 33 nodes
+  If (feature 2 <= 2.0)
+   Predict: 0.0
+  Else (feature 2 > 2.0)
+   If (feature 8 <= 0.0)
+    If (feature 0 <= 41.0)
+     If (feature 0 <= 8.0)
+      If (feature 2 <= 5.0)
+       Predict: 5.975846931562346
+      Else (feature 2 > 5.0)
+       Predict: 12.885097073162328
+     Else (feature 0 > 8.0)
+      If (feature 0 <= 37.0)
+       Predict: 3.969625131129174
+      Else (feature 0 > 37.0)
+       Predict: 8.078176933028162
+    Else (feature 0 > 41.0)
+     If (feature 1 <= 173.0)
+      If (feature 1 <= 154.0)
+       Predict: 11.209519569930475
+      Else (feature 1 > 154.0)
+       Predict: 4.928104243776302
+     Else (feature 1 > 173.0)
+      If (feature 1 <= 197.0)
+       Predict: 29.519502894882702
+      Else (feature 1 > 197.0)
+       Predict: 12.870877752055616
+   Else (feature 8 > 0.0)
+    If (feature 0 <= 73.0)
+     If (feature 5 <= 4.0)
+      If (feature 5 <= 0.0)
+       Predict: 0.7484140492031565
+      Else (feature 5 > 0.0)
+       Predict: 0.14508335562093252
+     Else (feature 5 > 4.0)
+      If (feature 1 <= 118.0)
+       Predict: 0.39662982820877557
+      Else (feature 1 > 118.0)
+       Predict: 0.8273185015891155
+    Else (feature 0 > 73.0)
+     If (feature 1 <= 185.0)
+      If (feature 1 <= 141.0)
+       Predict: 1.2946606166086525
+      Else (feature 1 > 141.0)
+       Predict: 0.32490210181411333
+     Else (feature 1 > 185.0)
+      If (feature 1 <= 322.0)
+       Predict: 1.8307131666780192
+      Else (feature 1 > 322.0)
+       Predict: 0.8820818514251365
