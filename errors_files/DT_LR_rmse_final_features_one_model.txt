@@ -1,0 +1,6 @@
+Training set contains 22 weeks i.e. 22176 time slots 
+Test set contains 5 weeks i.e. 5040 time slots 
+RMSE for DT is 14.15208140285912
+R2 for DT is 0.35100467053779405
+RMSE for LR is 15.226805475494714
+R2 for LR is 0.24869109806587608
