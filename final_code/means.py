@@ -50,8 +50,8 @@ for i in range((N_DAYS_TEST - (7 - FIRST_DAY_OF_TEST)) % 7):
     TEST_WEEKDAY_DAYS_COUNT[i] += 1
 
 """Location related constants"""
-HORIZONTAL_SLOTS = 25  # number of slots in grid
-VERTICAL_SLOTS = 25  # number of slots in grid
+HORIZONTAL_SLOTS = 24  # number of slots in grid
+VERTICAL_SLOTS = 24  # number of slots in grid
 
 N_OF_CLUSTERS = 358  # number of clusters for which mean is being calculated (358 for all)
 
@@ -68,7 +68,7 @@ def means_weekday_hour():
     # Init model
     weekday_hours_means = [[0 for i in range(24)] for j in range(7)]
 
-    # Train model (compute mean for each week_day and hour combination)
+    # Train model (compute me an for each week_day and hour combination)
     for week_day in range(7):
         for hour in range(24):
             data = spark.sql("SELECT SUM(amount) AS amount"
@@ -252,7 +252,7 @@ def means_grid_weekday_hour():
             all_actuals.extend(test_labels)
 
     overall_rmse, overall_r2 = eval(all_predictions, all_actuals)
-    grid_write_to_files("grid_weekday_hour", overall_rmse, overall_r2, rmses, r2s)
+    grid_write_to_files("means_grid_weekday_hour", overall_rmse, overall_r2, rmses, r2s)
 
 
 def eval(predicted, actual):
@@ -301,9 +301,7 @@ def grid_write_to_files(method, overall_rmse, overall_r2, rmses, r2s):
     file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains " + str(N_DAYS_TEST) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TEST) + " time slots \n")
-
-    file.write("Overall rmse is: " + str(overall_rmse))
-    file.write("Overal r2 is: " + str(overall_r2))
+    file.write("Overall rmse is: " + str(overall_rmse) + "\n")
 
     for x in range(HORIZONTAL_SLOTS):
         for y in range(VERTICAL_SLOTS):
@@ -314,6 +312,8 @@ def grid_write_to_files(method, overall_rmse, overall_r2, rmses, r2s):
     file.write("Training set contains " + str(N_DAYS_TRAIN) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TRAIN) + " time slots \nTest set contains " + str(N_DAYS_TEST) + " days i.e. " + str(
         N_OF_TIME_SLOTS_TEST) + " time slots \n")
+    file.write("Overall r2 is: " + str(overall_r2) + "\n")
+
     for x in range(HORIZONTAL_SLOTS):
         for y in range(VERTICAL_SLOTS):
             file.write("R2 for grid :  (" + str(x) + ', ' + str(y) + ") is " + str(r2s[x][y]) + "\n")
@@ -324,3 +324,4 @@ def grid_write_to_files(method, overall_rmse, overall_r2, rmses, r2s):
 means_weekday_hour()
 means_grid_weekday_hour()
 means_clusters_weekday_hour()
+
