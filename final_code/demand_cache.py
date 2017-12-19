@@ -1,20 +1,18 @@
-from schemas import *
+from schemas import registerTable, Table
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from timeit import timeit
 
-CACHED_TIMESLOT_COUNT = 5              # The total number of pages to be fetched, including the 'current page'
+CACHED_TIMESLOT_COUNT = 8              # The total number of pages to be fetched, including the 'current page'
 
 DEMAND_CACHE_DEBUG = False             # Controls debug prints
 
 DEMAND_CACHE_ASYNC = True              # If true, future pages will be fetched asynchronously
 
-DEMAND_CACHE_UNPACK_DATAFRAMES = False  # If true, dataframes will be converted to a dictionary format.
+DEMAND_CACHE_UNPACK_DATAFRAMES = True  # If true, dataframes will be converted to a dictionary format.
                                        # This will make queries faster, but initial fetching slower.
                                        # If both DEMAND_CACHE_ASYNC and DEMAND_CACHE_HEAVY_FETCH
                                        # are true, this conversion will be done in the background if possible
-
-FINAL_DATA_TABLE = 'clusters/final_data50.0'
 
 """
 DemandCache can be used to efficiently fetch individual values from the demand table.
@@ -54,7 +52,7 @@ DEMAND_CACHE_UNPACK_DATAFRAMES = False will destroy performance. It only makes s
 class DemandCache:
     class _Impl:
         def __init__(self, spark, sqlCtx):
-            spark.read.parquet(hadoopify(FINAL_DATA_TABLE)).registerTempTable('final_data')
+            registerTable(sqlCtx, Table.DEMAND)
             self._spark = spark
             self._exec = ThreadPoolExecutor(max_workers=3)
             self._start_tid = -1
@@ -64,13 +62,12 @@ class DemandCache:
                  print('Demand cache initialized')
 
         def _fetch(self, tid):
-            res = self._spark.sql('SELECT * FROM final_data WHERE pickup_timeslot_id = {}'.format(tid))
-            tmp = {(row['pickup_timeslot_id'], row['origin']): row for row in res.collect()}
+            res = self._spark.sql('SELECT * FROM demand WHERE pickup_timeslot_id = {}'.format(tid))
             if DEMAND_CACHE_DEBUG:
                 print("Page {} fetched".format(tid))
-            #if DEMAND_CACHE_UNPACK_DATAFRAMES:
-                #res = {cid: amount for (_, cid, amount) in res.collect()}
-            return tmp
+            if DEMAND_CACHE_UNPACK_DATAFRAMES:
+                res = {cid: demand for (_, cid, demand) in res.collect()}
+            return res
 
         def _reinit(self, tid):
             if DEMAND_CACHE_DEBUG:
@@ -101,8 +98,7 @@ class DemandCache:
                                                                                                  tid + CACHED_TIMESLOT_COUNT - 1))
                     next = self._next_pages.popleft()
                     del self._current_page
-                    tmp = next.result() if DEMAND_CACHE_ASYNC else next
-                    self._current_page = tmp#{(row['pickup_timeslot_id'], row['origin']): row for row in tmp.collect()}
+                    self._current_page = next.result() if DEMAND_CACHE_ASYNC else next
                     self._start_tid = tid
                     if DEMAND_CACHE_ASYNC:
                         self._next_pages.append(self._exec.submit(self._fetch, tid + CACHED_TIMESLOT_COUNT - 1))
@@ -121,12 +117,10 @@ class DemandCache:
         def get_demand(self, tid, cid):
             self._update_page(tid, cid)
             if DEMAND_CACHE_UNPACK_DATAFRAMES:
-                #return self._current_page.get(cid, 0)
-                return self._current_page.filter('pickup_timeslot_id = 0 AND origin = {}'.format(cid))
+                return self._current_page.get(cid, 0)
             else:
-                #res = self._current_page.filter('pickup_timeslot_id = {} AND origin = {}'.format(tid, cid))
-                #return res.head() if res.count() > 0 else []
-                return self._current_page[(tid, cid)] if (tid, cid) in self._current_page.keys() else []
+                res = self._current_page.filter('pickup_timeslot_id = {} AND pickup_cid = {}'.format(tid, cid))
+                return res.head()['cnt'] if res.count() > 0 else 0
 
         def hint(self, tid):
             self._update_page(tid, 0)
@@ -147,12 +141,10 @@ class DemandCache:
         return getattr(DemandCache.instance, item)
 
 
-
-
 class InvertedDemandCache:
     class _Impl:
         def __init__(self, spark, sqlCtx):
-            registerTable(sqlCtx, Table.FINAL_DATA)
+            registerTable(sqlCtx, Table.DEMAND)
             self._spark = spark
             self._exec = ThreadPoolExecutor(max_workers=3)
             self._start_cid = -1
@@ -162,11 +154,11 @@ class InvertedDemandCache:
                  print('Demand cache initialized')
 
         def _fetch(self, cid):
-            res = self._spark.sql('SELECT * FROM final_data WHERE origin = {}'.format(cid))
+            res = self._spark.sql('SELECT * FROM demand WHERE pickup_cid = {}'.format(cid))
             if DEMAND_CACHE_DEBUG:
-                print("Page {} fetched".format(cid))
+                print("Page {} fetched".format(tid))
             if DEMAND_CACHE_UNPACK_DATAFRAMES:
-                res = {tid: amount for (tid, _, amount) in res.collect()}
+                res = {tid: demand for (tid, _, demand) in res.collect()}
             return res
 
         def _reinit(self, cid):
@@ -219,7 +211,7 @@ class InvertedDemandCache:
             if DEMAND_CACHE_UNPACK_DATAFRAMES:
                 return self._current_page.get(tid, 0)
             else:
-                res = self._current_page.filter('pickup_timeslot_id = {} AND origin = {}'.format(tid, cid))
+                res = self._current_page.filter('pickup_timeslot_id = {} AND pickup_cid = {}'.format(tid, cid))
                 return res.head()['cnt'] if res.count() > 0 else 0
 
         def hint(self, cid):

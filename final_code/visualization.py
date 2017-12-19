@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from math import log
 
-spark = SparkSession.builder.master('spark://172.25.24.242:7077').getOrCreate()
+spark = SparkSession.builder.master('spark://csit7-master:7077').getOrCreate()
 sqlCtx = SQLContext(spark.sparkContext, spark)
 
 
@@ -185,10 +185,10 @@ def grid_demand():
 
 # call visualizations here
 # https://data.cityofnewyork.us/api/geospatial/xr67-eavy?method=export&format=Shapefile
-# For map visualization, download this file first (shapefile of NYC streets)
+# For map visualization, download this ^^^ file first (shapefile of NYC streets)
 
 # monthly_demand()
-#hourly_demand()
+# hourly_demand()
 # weekday_demand()
 weekly_demand()
 # points_demand()
